@@ -1,0 +1,134 @@
+.orders-page {
+  min-height: 100vh;
+  background: var(--bg-secondary);
+  padding-top: 2rem;
+}
+
+.page-header h1 {
+  color: var(--text-primary);
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.orders-tabs .nav-link {
+  color: var(--text-secondary);
+  font-weight: 500;
+  padding: 1rem 1.5rem;
+  border: none;
+  border-bottom: 3px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.orders-tabs .nav-link:hover {
+  color: var(--primary-color);
+  border-bottom-color: var(--primary-color);
+}
+
+.orders-tabs .nav-link.active {
+  color: var(--primary-color);
+  background: none;
+  border-bottom-color: var(--primary-color);
+}
+
+.order-card {
+  border: none;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  transition: all 0.3s ease;
+}
+
+.order-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-xl);
+}
+
+.order-header {
+  background: var(--gradient-cool);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  padding: 1.5rem;
+}
+
+.order-info h6 {
+  color: var(--text-primary);
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.order-date {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.status-badge {
+  font-size: 0.8rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 50px;
+}
+
+.order-total strong {
+  color: var(--primary-color);
+  font-size: 1.1rem;
+}
+
+.order-actions {
+  text-align: right;
+}
+
+.order-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.order-item {
+  display: flex;
+  align-items: center;
+  background: var(--bg-secondary);
+  padding: 1rem;
+  border-radius: var(--radius-md);
+  flex: 1;
+  min-width: 250px;
+}
+
+.item-image {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  margin-right: 1rem;
+}
+
+.item-details h6 {
+  font-size: 0.9rem;
+  margin-bottom: 0.25rem;
+  color: var(--text-primary);
+}
+
+.item-details p {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.item-price {
+  font-weight: 600;
+  color: var(--primary-color);
+}
+
+.tracking-info {
+  background: var(--bg-tertiary);
+  padding: 1rem;
+  border-radius: var(--radius-md);
+  border-left: 4px solid var(--primary-color);
+}
+
+.tracking-info h6 {
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.empty-orders i {
+  font-size: 4rem;
+  color: var(--text-muted);
+}

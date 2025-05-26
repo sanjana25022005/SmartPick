@@ -1,0 +1,99 @@
+.categories-page {
+  min-height: 100vh;
+  background: var(--bg-primary);
+  padding-top: 2rem;
+}
+
+.category-header {
+  background: var(--gradient-cool);
+  border-radius: var(--radius-xl);
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+
+.category-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.category-description {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.products-count {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--primary-color);
+}
+
+.filters-sidebar {
+  position: sticky;
+  top: 120px;
+}
+
+.filter-card {
+  border: none;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  margin-bottom: 1.5rem;
+}
+
+.filter-title {
+  color: var(--text-primary);
+  font-weight: 600;
+  margin-bottom: 1rem;
+  font-size: 1rem;
+}
+
+.filter-section {
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.filter-section:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.price-range-display {
+  text-align: center;
+  font-weight: 500;
+  color: var(--primary-color);
+  margin-top: 0.5rem;
+}
+
+.special-offers-card {
+  border: none;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  background: var(--gradient-warm);
+  color: white;
+}
+
+.offer-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.products-controls {
+  background: var(--bg-secondary);
+  padding: 1rem;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.sort-select {
+  border-radius: var(--radius-md);
+  border: 2px solid var(--border-color);
+}
+
+.view-options .btn {
+  border-radius: var(--radius-md);
+  margin-left: 0.25rem;
+}

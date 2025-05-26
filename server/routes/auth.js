@@ -1,314 +1,252 @@
 // routes/auth.js
 const express = require('express');
 const jwt = require('jsonwebtoken');
-const { User, Admin } = require('../models');
-const { authenticateUser } = require('../middleware/auth');
-const { validateRegistration, validateLogin } = require('../middleware/validation');
-const rateLimiter = require('../middleware/rateLimiter');
+const { body, validationResult } = require('express-validator');
+const User = require('../models/User');
+const { auth } = require('../middleware/auth');
 
 const router = express.Router();
 
-// Apply rate limiting to auth routes
-router.use('/register', rateLimiter(3, 15 * 60 * 1000)); // 3 requests per 15 minutes
-router.use('/login', rateLimiter(5, 15 * 60 * 1000)); // 5 requests per 15 minutes
-router.use('/admin/login', rateLimiter(3, 15 * 60 * 1000)); // 3 requests per 15 minutes
+// Generate JWT Token
+const generateToken = (userId) => {
+  return jwt.sign({ userId }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRE || '30d'
+  });
+};
 
-// User Registration
-router.post('/register', validateRegistration, async (req, res) => {
+// @route   POST /api/auth/register
+// @desc    Register user
+// @access  Public
+router.post('/register', [
+  body('firstName', 'First name is required').notEmpty().trim(),
+  body('lastName', 'Last name is required').notEmpty().trim(),
+  body('email', 'Please include a valid email').isEmail().normalizeEmail(),
+  body('password', 'Password must be at least 6 characters').isLength({ min: 6 })
+], async (req, res) => {
   try {
-    const { username, email, password, firstName, lastName, phone } = req.body;
-    
-    // Check if user already exists
-    const existingUser = await User.findOne({ $or: [{ email }, { username }] });
-    if (existingUser) {
-      return res.status(400).json({ 
-        message: 'User already exists with that email or username' 
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Validation failed',
+        errors: errors.array()
       });
     }
-    
-    // Create new user
+
+    const { firstName, lastName, email, password, phone } = req.body;
+
+    // Check if user already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({
+        success: false,
+        message: 'User already exists with this email'
+      });
+    }
+
+    // Create user
     const user = new User({
-      username,
-      email,
-      password, // Will be hashed via pre-save hook
       firstName,
       lastName,
-      phone
+      email,
+      password,
+      phone,
+      isVerified: true // Auto-verify for demo
     });
-    
+
     await user.save();
-    
-    // Generate JWT token
-    const token = jwt.sign(
-      { id: user._id, role: 'user' },
-      process.env.JWT_SECRET,
-      { expiresIn: '30d' }
-    );
-    
-    // Return user data (excluding password) and token
+
+    // Generate token
+    const token = generateToken(user._id);
+
     res.status(201).json({
+      success: true,
       message: 'User registered successfully',
       token,
       user: {
         id: user._id,
-        username: user.username,
-        email: user.email,
         firstName: user.firstName,
-        lastName: user.lastName
+        lastName: user.lastName,
+        email: user.email,
+        phone: user.phone,
+        isAdmin: user.isAdmin,
+        isVerified: user.isVerified
       }
     });
   } catch (error) {
-    console.error('Register error:', error);
-    
-    // Handle validation errors
-    if (error.name === 'ValidationError') {
-      const errors = Object.values(error.errors).map(err => err.message);
-      return res.status(400).json({ 
-        message: 'Validation failed', 
-        errors 
-      });
-    }
-    
-    res.status(500).json({ message: 'Server error', error: error.message });
+    console.error('Registration error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error during registration'
+    });
   }
 });
 
-// User Login
-router.post('/login', validateLogin, async (req, res) => {
+// @route   POST /api/auth/login
+// @desc    Login user
+// @access  Public
+router.post('/login', [
+  body('email', 'Please include a valid email').isEmail().normalizeEmail(),
+  body('password', 'Password is required').exists()
+], async (req, res) => {
   try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Validation failed',
+        errors: errors.array()
+      });
+    }
+
     const { email, password } = req.body;
-    
-    // Find user by email
-    const user = await User.findOne({ email });
+
+    // Find user and include password for comparison
+    const user = await User.findOne({ email }).select('+password');
     if (!user) {
-      return res.status(400).json({ message: 'Invalid credentials' });
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid credentials'
+      });
     }
-    
-    // Verify password
-    const isMatch = await user.comparePassword(password);
-    if (!isMatch) {
-      return res.status(400).json({ message: 'Invalid credentials' });
+
+    // Check password
+    const isPasswordMatch = await user.comparePassword(password);
+    if (!isPasswordMatch) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid credentials'
+      });
     }
-    
-    // Generate JWT token
-    const token = jwt.sign(
-      { id: user._id, role: 'user' },
-      process.env.JWT_SECRET,
-      { expiresIn: '30d' }
-    );
-    
-    // Return user data and token
+
+    // Check if user is active
+    if (user.status !== 'active') {
+      return res.status(401).json({
+        success: false,
+        message: 'Account is not active'
+      });
+    }
+
+    // Generate token
+    const token = generateToken(user._id);
+
     res.json({
+      success: true,
       message: 'Login successful',
       token,
       user: {
         id: user._id,
-        username: user.username,
-        email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
-        isAdmin: user.isAdmin
+        email: user.email,
+        phone: user.phone,
+        isAdmin: user.isAdmin,
+        isVerified: user.isVerified,
+        addresses: user.addresses,
+        preferences: user.preferences
       }
     });
   } catch (error) {
     console.error('Login error:', error);
-    res.status(500).json({ message: 'Server error', error: error.message });
+    res.status(500).json({
+      success: false,
+      message: 'Server error during login'
+    });
   }
 });
 
-// Admin Login
-router.post('/admin/login', validateLogin, async (req, res) => {
+// @route   GET /api/auth/me
+// @desc    Get current user
+// @access  Private
+router.get('/me', auth, async (req, res) => {
   try {
-    const { email, password } = req.body;
-    
-    // First try to find an admin
-    let admin = await Admin.findOne({ email });
-    
-    // If admin not found, check for user with admin privileges
-    if (!admin) {
-      const user = await User.findOne({ email, isAdmin: true });
-      if (!user) {
-        return res.status(400).json({ message: 'Invalid credentials' });
-      }
-      
-      // Verify password
-      const isMatch = await user.comparePassword(password);
-      if (!isMatch) {
-        return res.status(400).json({ message: 'Invalid credentials' });
-      }
-      
-      // Generate JWT token for user with admin privileges
-      const token = jwt.sign(
-        { id: user._id, role: 'user' },
-        process.env.JWT_SECRET,
-        { expiresIn: '24h' }
-      );
-      
-      return res.json({
-        message: 'Admin login successful',
-        token,
-        user: {
-          id: user._id,
-          username: user.username,
-          email: user.email,
-          isAdmin: user.isAdmin
-        }
+    const user = await User.findById(req.user.userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
       });
     }
-    
-    // Verify admin password
-    const isMatch = await admin.comparePassword(password);
-    if (!isMatch) {
-      return res.status(400).json({ message: 'Invalid credentials' });
-    }
-    
-    // Update last login time
-    admin.lastLogin = Date.now();
-    await admin.save();
-    
-    // Generate JWT token for admin
-    const token = jwt.sign(
-      { id: admin._id, role: 'admin' },
-      process.env.JWT_SECRET,
-      { expiresIn: '24h' }
-    );
-    
-    // Return admin data and token
-    res.json({
-      message: 'Admin login successful',
-      token,
-      admin: {
-        id: admin._id,
-        email: admin.email,
-        firstName: admin.firstName,
-        lastName: admin.lastName,
-        role: admin.role
-      }
-    });
-  } catch (error) {
-    console.error('Admin login error:', error);
-    res.status(500).json({ message: 'Server error', error: error.message });
-  }
-});
 
-// Get current user profile
-router.get('/me', authenticateUser, async (req, res) => {
-  try {
-    // req.user is already populated from the authenticateUser middleware
     res.json({
+      success: true,
       user: {
-        id: req.user._id,
-        username: req.user.username,
-        email: req.user.email,
-        firstName: req.user.firstName,
-        lastName: req.user.lastName,
-        phone: req.user.phone,
-        addresses: req.user.addresses,
-        wishlist: req.user.wishlist,
-        isAdmin: req.user.isAdmin
+        id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        phone: user.phone,
+        isAdmin: user.isAdmin,
+        isVerified: user.isVerified,
+        addresses: user.addresses,
+        preferences: user.preferences
       }
     });
   } catch (error) {
-    console.error('Get profile error:', error);
-    res.status(500).json({ message: 'Server error', error: error.message });
+    console.error('Get current user error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error'
+    });
   }
 });
 
-// Update user profile
-router.put('/me', authenticateUser, async (req, res) => {
+// @route   PUT /api/auth/profile
+// @desc    Update user profile
+// @access  Private
+router.put('/profile', auth, [
+  body('firstName', 'First name is required').optional().notEmpty().trim(),
+  body('lastName', 'Last name is required').optional().notEmpty().trim(),
+  body('phone', 'Please provide a valid phone number').optional().isMobilePhone()
+], async (req, res) => {
   try {
-    const { firstName, lastName, phone } = req.body;
-    
-    // Find and update user
-    const user = req.user;
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Validation failed',
+        errors: errors.array()
+      });
+    }
+
+    const { firstName, lastName, phone, preferences } = req.body;
+
+    const user = await User.findById(req.user.userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Update fields
     if (firstName) user.firstName = firstName;
     if (lastName) user.lastName = lastName;
     if (phone) user.phone = phone;
-    
+    if (preferences) user.preferences = { ...user.preferences, ...preferences };
+
     await user.save();
-    
+
     res.json({
+      success: true,
       message: 'Profile updated successfully',
       user: {
         id: user._id,
-        username: user.username,
-        email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
-        phone: user.phone
+        email: user.email,
+        phone: user.phone,
+        isAdmin: user.isAdmin,
+        addresses: user.addresses,
+        preferences: user.preferences
       }
     });
   } catch (error) {
-    console.error('Update profile error:', error);
-    res.status(500).json({ message: 'Server error', error: error.message });
-  }
-});
-
-// Add address to user profile
-router.post('/address', authenticateUser, async (req, res) => {
-  try {
-    const { street, city, state, zipCode, country, isDefault } = req.body;
-    
-    const user = req.user;
-    
-    // If this address is set as default, unset any existing default
-    if (isDefault) {
-      user.addresses.forEach(addr => {
-        addr.isDefault = false;
-      });
-    }
-    
-    // Add new address
-    user.addresses.push({
-      street,
-      city,
-      state,
-      zipCode,
-      country: country || 'India',
-      isDefault: isDefault || user.addresses.length === 0 // Make default if it's the first address
+    console.error('Profile update error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error during profile update'
     });
-    
-    await user.save();
-    
-    res.status(201).json({
-      message: 'Address added successfully',
-      addresses: user.addresses
-    });
-  } catch (error) {
-    console.error('Add address error:', error);
-    res.status(500).json({ message: 'Server error', error: error.message });
-  }
-});
-
-// Change password
-router.put('/password', authenticateUser, async (req, res) => {
-  try {
-    const { currentPassword, newPassword } = req.body;
-    
-    // Validate new password
-    if (!newPassword || newPassword.length < 6) {
-      return res.status(400).json({ 
-        message: 'New password must be at least 6 characters long' 
-      });
-    }
-    
-    // Get user with password (we need this for comparison)
-    const user = await User.findById(req.user._id);
-    
-    // Verify current password
-    const isMatch = await user.comparePassword(currentPassword);
-    if (!isMatch) {
-      return res.status(400).json({ message: 'Current password is incorrect' });
-    }
-    
-    // Update password
-    user.password = newPassword;
-    await user.save();
-    
-    res.json({ message: 'Password updated successfully' });
-  } catch (error) {
-    console.error('Password change error:', error);
-    res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
 

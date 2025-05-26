@@ -1,0 +1,142 @@
+.metrics-card {
+  border: none;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+}
+
+.revenue-card {
+  background: var(--gradient-primary);
+  color: white;
+}
+
+.orders-card {
+  background: var(--gradient-cool);
+}
+
+.customers-card {
+  background: var(--gradient-warm);
+  color: white;
+}
+
+.metrics-content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.metrics-icon {
+  font-size: 2rem;
+  opacity: 0.8;
+}
+
+.metrics-info h3 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.metrics-growth {
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+}
+
+.growth-badge {
+  padding: 0.25rem 0.5rem;
+  border-radius: 50px;
+  font-weight: 600;
+  margin-left: 0.5rem;
+}
+
+.growth-badge.positive {
+  background: rgba(16, 185, 129, 0.2);
+  color: #10b981;
+}
+
+.growth-badge.negative {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+}
+
+.analytics-card {
+  border: none;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  margin-bottom: 2rem;
+}
+
+.product-rank {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.rank-badge {
+  background: var(--gradient-primary);
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 50px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.category-analytics {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.category-item {
+  flex: 1;
+}
+
+.category-header {
+  display: flex;
+  justify-content: between;
+  margin-bottom: 0.5rem;
+}
+
+.category-name {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.category-sales {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.category-progress {
+  height: 0.5rem;
+  border-radius: 50px;
+}
+
+.activity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.activity-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+}
+
+.activity-icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.activity-details p {
+  margin: 0;
+  color: var(--text-primary);
+}
