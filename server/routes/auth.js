@@ -3,11 +3,18 @@ const express = require('express');
 const jwt = require('jsonwebtoken');
 const { User, Admin } = require('../models');
 const { authenticateUser } = require('../middleware/auth');
+const { validateRegistration, validateLogin } = require('../middleware/validation');
+const rateLimiter = require('../middleware/rateLimiter');
 
 const router = express.Router();
 
+// Apply rate limiting to auth routes
+router.use('/register', rateLimiter(3, 15 * 60 * 1000)); // 3 requests per 15 minutes
+router.use('/login', rateLimiter(5, 15 * 60 * 1000)); // 5 requests per 15 minutes
+router.use('/admin/login', rateLimiter(3, 15 * 60 * 1000)); // 3 requests per 15 minutes
+
 // User Registration
-router.post('/register', async (req, res) => {
+router.post('/register', validateRegistration, async (req, res) => {
   try {
     const { username, email, password, firstName, lastName, phone } = req.body;
     
@@ -52,12 +59,22 @@ router.post('/register', async (req, res) => {
     });
   } catch (error) {
     console.error('Register error:', error);
+    
+    // Handle validation errors
+    if (error.name === 'ValidationError') {
+      const errors = Object.values(error.errors).map(err => err.message);
+      return res.status(400).json({ 
+        message: 'Validation failed', 
+        errors 
+      });
+    }
+    
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
 
 // User Login
-router.post('/login', async (req, res) => {
+router.post('/login', validateLogin, async (req, res) => {
   try {
     const { email, password } = req.body;
     
@@ -100,13 +117,12 @@ router.post('/login', async (req, res) => {
 });
 
 // Admin Login
-router.post('/admin/login', async (req, res) => {
+router.post('/admin/login', validateLogin, async (req, res) => {
   try {
     const { email, password } = req.body;
     
     // First try to find an admin
     let admin = await Admin.findOne({ email });
-    let isAdmin = true;
     
     // If admin not found, check for user with admin privileges
     if (!admin) {
@@ -268,6 +284,13 @@ router.post('/address', authenticateUser, async (req, res) => {
 router.put('/password', authenticateUser, async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;
+    
+    // Validate new password
+    if (!newPassword || newPassword.length < 6) {
+      return res.status(400).json({ 
+        message: 'New password must be at least 6 characters long' 
+      });
+    }
     
     // Get user with password (we need this for comparison)
     const user = await User.findById(req.user._id);
