@@ -19,6 +19,9 @@ import AdminProducts from './pages/Admin/Products';
 import AdminOrders from './pages/Admin/Orders';
 import AdminUsers from './pages/Admin/Users';
 import AdminAnalytics from './pages/Admin/Analytics';
+import Orders from './pages/Orders';
+import Blog from './pages/Blog/Blog';
+import BlogPost from './pages/BlogPost';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 
@@ -37,11 +40,18 @@ function App() {
                 <Route path="/register" element={<Register />} />
                 <Route path="/products" element={<Products />} />
                 <Route path="/products/:id" element={<ProductDetail />} />
+                <Route path="/blog" element={<Blog />} />
+                <Route path="/blog/:id" element={<BlogPost />} />
                 
                 {/* Protected Routes */}
                 <Route path="/cart" element={
                   <ProtectedRoute>
                     <Cart />
+                  </ProtectedRoute>
+                } />
+                <Route path="/orders" element={
+                  <ProtectedRoute>
+                    <Orders />
                   </ProtectedRoute>
                 } />
                 <Route path="/checkout" element={

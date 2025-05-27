@@ -47,37 +47,20 @@ const CustomNavbar = () => {
         <Navbar.Collapse id="basic-navbar-nav">
           {/* Main Navigation */}
           <Nav className="me-auto">
-            <Nav.Link as={Link} to="/" className="nav-link">
-              <i className="fas fa-home me-2"></i>
-              Home
-            </Nav.Link>
-            <Nav.Link as={Link} to="/products" className="nav-link">
-              <i className="fas fa-shopping-bag me-2"></i>
-              Products
-            </Nav.Link>
-            <NavDropdown title={
-              <span>
-                <i className="fas fa-list me-2"></i>
-                Categories
-              </span>
-            } id="categories-dropdown">
-              <NavDropdown.Item as={Link} to="/products?category=pens">
-                <i className="fas fa-pen me-2"></i>
-                Pens & Writing
-              </NavDropdown.Item>
-              <NavDropdown.Item as={Link} to="/products?category=notebooks">
-                <i className="fas fa-book me-2"></i>
-                Notebooks & Paper
-              </NavDropdown.Item>
-              <NavDropdown.Item as={Link} to="/products?category=organizers">
-                <i className="fas fa-th-large me-2"></i>
-                Desk Organizers
-              </NavDropdown.Item>
-              <NavDropdown.Item as={Link} to="/products?category=art">
-                <i className="fas fa-paint-brush me-2"></i>
-                Art & Craft
-              </NavDropdown.Item>
-            </NavDropdown>
+            <Nav.Link as={Link} to="/">Home</Nav.Link>
+            <Nav.Link as={Link} to="/products">Products</Nav.Link>
+            <Nav.Link as={Link} to="/blog">Blog</Nav.Link>
+            {isAuthenticated && (
+              <Nav.Link as={Link} to="/orders">My Orders</Nav.Link>
+            )}
+            {user?.isAdmin && (
+              <NavDropdown title="Admin" id="admin-nav-dropdown">
+                <NavDropdown.Item as={Link} to="/admin/dashboard">Dashboard</NavDropdown.Item>
+                <NavDropdown.Item as={Link} to="/admin/products">Products</NavDropdown.Item>
+                <NavDropdown.Item as={Link} to="/admin/orders">Orders</NavDropdown.Item>
+                <NavDropdown.Item as={Link} to="/admin/users">Users</NavDropdown.Item>
+              </NavDropdown>
+            )}
           </Nav>
 
           {/* Right Side Navigation */}

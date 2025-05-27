@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../../contexts/CartContext';
 import { useAuth } from '../../contexts/AuthContext';
 import './Cart.css';
+import BundleSuggestions from '../../components/Cart/BundleSuggestions';
 
 const Cart = () => {
   const { cartItems = [], cartTotal, updateQuantity, removeFromCart } = useCart();
@@ -60,141 +61,147 @@ const Cart = () => {
   }
 
   return (
-    <Container className="py-5" style={{ marginTop: '120px' }}>
-      <Row>
-        <Col lg={8}>
-          <Card className="cart-items-card">
-            <Card.Header>
-              <h4 className="mb-0">
-                <i className="fas fa-shopping-cart me-2"></i>
-                Shopping Cart ({cartItems.length} items)
-              </h4>
-            </Card.Header>
-            <Card.Body className="p-0">
-              <Table responsive className="mb-0">
-                <thead>
-                  <tr>
-                    <th>Product</th>
-                    <th>Price</th>
-                    <th>Quantity</th>
-                    <th>Total</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {cartItems.map((item) => (
-                    <tr key={item.id}>
-                      <td>
-                        <div className="product-info">
-                          <img 
-                            src={item.images?.[0] || item.image || 'https://via.placeholder.com/80x80'} 
-                            alt={item.name}
-                            className="product-image"
-                          />
-                          <div className="product-details">
-                            <h6 className="product-name">{item.name}</h6>
-                            <p className="product-brand">{item.brand}</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td>
-                        <strong>{formatPrice(item.price)}</strong>
-                      </td>
-                      <td>
-                        <div className="quantity-controls">
-                          <Button 
-                            variant="outline-secondary" 
-                            size="sm"
-                            onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
-                          >
-                            <i className="fas fa-minus"></i>
-                          </Button>
-                          <span className="quantity-display">{item.quantity}</span>
-                          <Button 
-                            variant="outline-secondary" 
-                            size="sm"
-                            onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
-                          >
-                            <i className="fas fa-plus"></i>
-                          </Button>
-                        </div>
-                      </td>
-                      <td>
-                        <strong>{formatPrice(item.price * item.quantity)}</strong>
-                      </td>
-                      <td>
-                        <Button 
-                          variant="outline-danger" 
-                          size="sm"
-                          onClick={() => removeFromCart(item.id)}
-                        >
-                          <i className="fas fa-trash"></i>
-                        </Button>
-                      </td>
+    <div className="cart-page" style={{ marginTop: '120px', paddingTop: '2rem', paddingBottom: '2rem' }}>
+      <Container>
+        <Row>
+          <Col lg={8}>
+            <Card className="cart-items-card">
+              <Card.Header>
+                <h4 className="mb-0">
+                  <i className="fas fa-shopping-cart me-2"></i>
+                  Shopping Cart ({cartItems.length} items)
+                </h4>
+              </Card.Header>
+              <Card.Body className="p-0">
+                <Table responsive className="mb-0">
+                  <thead>
+                    <tr>
+                      <th>Product</th>
+                      <th>Price</th>
+                      <th>Quantity</th>
+                      <th>Total</th>
+                      <th>Action</th>
                     </tr>
-                  ))}
-                </tbody>
-              </Table>
-            </Card.Body>
-          </Card>
-        </Col>
+                  </thead>
+                  <tbody>
+                    {cartItems.map((item) => (
+                      <tr key={item.id}>
+                        <td>
+                          <div className="product-info">
+                            <img 
+                              src={item.images?.[0] || item.image || 'https://via.placeholder.com/80x80'} 
+                              alt={item.name}
+                              className="product-image"
+                            />
+                            <div className="product-details">
+                              <h6 className="product-name">{item.name}</h6>
+                              <p className="product-brand">{item.brand}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td>
+                          <strong>{formatPrice(item.price)}</strong>
+                        </td>
+                        <td>
+                          <div className="quantity-controls">
+                            <Button 
+                              variant="outline-secondary" 
+                              size="sm"
+                              onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
+                            >
+                              <i className="fas fa-minus"></i>
+                            </Button>
+                            <span className="quantity-display">{item.quantity}</span>
+                            <Button 
+                              variant="outline-secondary" 
+                              size="sm"
+                              onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
+                            >
+                              <i className="fas fa-plus"></i>
+                            </Button>
+                          </div>
+                        </td>
+                        <td>
+                          <strong>{formatPrice(item.price * item.quantity)}</strong>
+                        </td>
+                        <td>
+                          <Button 
+                            variant="outline-danger" 
+                            size="sm"
+                            onClick={() => removeFromCart(item.id)}
+                          >
+                            <i className="fas fa-trash"></i>
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
+              </Card.Body>
+            </Card>
+          </Col>
 
-        <Col lg={4}>
-          <Card className="order-summary-card">
-            <Card.Header>
-              <h5 className="mb-0">Order Summary</h5>
-            </Card.Header>
-            <Card.Body>
-              <div className="summary-row">
-                <span>Subtotal:</span>
-                <span>{formatPrice(cartTotal)}</span>
-              </div>
-              <div className="summary-row">
-                <span>Shipping:</span>
-                <span>
-                  {cartTotal > 500 ? (
-                    <span className="text-success">FREE</span>
-                  ) : (
-                    formatPrice(50)
-                  )}
-                </span>
-              </div>
-              <hr />
-              <div className="summary-row total">
-                <strong>Total: {formatPrice(cartTotal + (cartTotal > 500 ? 0 : 50))}</strong>
-              </div>
-              
-              {cartTotal < 500 && (
-                <Alert variant="info" className="mt-3">
-                  <i className="fas fa-truck me-2"></i>
-                  Add {formatPrice(500 - cartTotal)} more for FREE shipping!
-                </Alert>
-              )}
+          <Col lg={4}>
+            <Card className="order-summary-card">
+              <Card.Header>
+                <h5 className="mb-0">Order Summary</h5>
+              </Card.Header>
+              <Card.Body>
+                <div className="summary-row">
+                  <span>Subtotal:</span>
+                  <span>{formatPrice(cartTotal)}</span>
+                </div>
+                <div className="summary-row">
+                  <span>Shipping:</span>
+                  <span>
+                    {cartTotal > 500 ? (
+                      <span className="text-success">FREE</span>
+                    ) : (
+                      formatPrice(50)
+                    )}
+                  </span>
+                </div>
+                <hr />
+                <div className="summary-row total">
+                  <strong>Total: {formatPrice(cartTotal + (cartTotal > 500 ? 0 : 50))}</strong>
+                </div>
+                
+                {cartTotal < 500 && (
+                  <Alert variant="info" className="mt-3">
+                    <i className="fas fa-truck me-2"></i>
+                    Add {formatPrice(500 - cartTotal)} more for FREE shipping!
+                  </Alert>
+                )}
 
-              <Button 
-                variant="primary" 
-                size="lg" 
-                className="w-100 mt-3"
-                onClick={handleCheckout}
-              >
-                <i className="fas fa-credit-card me-2"></i>
-                Proceed to Checkout
-              </Button>
+                <Button 
+                  variant="primary" 
+                  size="lg" 
+                  className="w-100 mt-3"
+                  onClick={handleCheckout}
+                >
+                  <i className="fas fa-credit-card me-2"></i>
+                  Proceed to Checkout
+                </Button>
 
-              <Button 
-                as={Link}
-                to="/products"
-                variant="outline-primary" 
-                className="w-100 mt-2"
-              >
-                <i className="fas fa-arrow-left me-2"></i>
-                Continue Shopping
-              </Button>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
-    </Container>
+                <Button 
+                  as={Link}
+                  to="/products"
+                  variant="outline-primary" 
+                  className="w-100 mt-2"
+                >
+                  <i className="fas fa-arrow-left me-2"></i>
+                  Continue Shopping
+                </Button>
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
+
+        {cartItems.length > 0 && (
+          <BundleSuggestions cartItems={cartItems} />
+        )}
+      </Container>
+    </div>
   );
 };
 
