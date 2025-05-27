@@ -105,6 +105,11 @@ export const CartProvider = ({ children }) => {
     }
   };
 
+  // Add missing isInCart function
+  const isInCart = (productId) => {
+    return cartItems.some(item => item.id === productId);
+  };
+
   // Calculate cart count
   const cartCount = Array.isArray(cartItems) ? cartItems.reduce((count, item) => count + item.quantity, 0) : 0;
 
@@ -114,7 +119,8 @@ export const CartProvider = ({ children }) => {
     addToCart,
     removeFromCart,
     updateQuantity,
-    clearCart
+    clearCart,
+    isInCart // Add this function to the context value
   };
 
   return (
