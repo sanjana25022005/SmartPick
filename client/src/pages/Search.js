@@ -9,7 +9,9 @@ const Search = () => {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sortBy, setSortBy] = useState('relevance');
-  const { addToCart, addToWishlist, isInWishlist, isInCart } = useCart();
+  // const { addToCart, addToWishlist, isInWishlist, isInCart } = useCart();
+  
+  // Remove the unused wishlist functions for now
 
   useEffect(() => {
     // Mock search results

@@ -13,7 +13,7 @@ const Categories = () => {
   const [priceRange, setPriceRange] = useState([0, 5000]);
   const [selectedBrands, setSelectedBrands] = useState([]);
   const [selectedRatings, setSelectedRatings] = useState([]);
-  const { addToCart, addToWishlist, isInWishlist, isInCart } = useCart();
+  const { addToCart } = useCart();
 
   const categoryData = {
     pens: {

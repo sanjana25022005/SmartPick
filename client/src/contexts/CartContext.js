@@ -5,40 +5,57 @@ const CartContext = createContext();
 export const useCart = () => {
   const context = useContext(CartContext);
   if (!context) {
-    throw new Error('useCart must be used within a CartProvider');
+    console.warn('useCart must be used within a CartProvider');
+    return {
+      cartItems: [],
+      cartTotal: 0,
+      cartCount: 0,
+      isOpen: false,
+      setIsOpen: () => {},
+      addToCart: () => {},
+      removeFromCart: () => {},
+      updateQuantity: () => {},
+      clearCart: () => {}
+    };
   }
   return context;
 };
 
 export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
-  const [wishlistItems, setWishlistItems] = useState([]);
+  const [isOpen, setIsOpen] = useState(false);
 
-  // Load cart and wishlist from localStorage on mount
+  // Load cart from localStorage on init
   useEffect(() => {
-    const savedCart = localStorage.getItem('smartpick_cart');
-    const savedWishlist = localStorage.getItem('smartpick_wishlist');
-    
-    if (savedCart) {
-      setCartItems(JSON.parse(savedCart));
-    }
-    
-    if (savedWishlist) {
-      setWishlistItems(JSON.parse(savedWishlist));
+    try {
+      const savedCart = localStorage.getItem('smartpick_cart');
+      if (savedCart) {
+        const parsedCart = JSON.parse(savedCart);
+        if (Array.isArray(parsedCart)) {
+          setCartItems(parsedCart);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading cart from localStorage:', error);
+      localStorage.removeItem('smartpick_cart');
     }
   }, []);
 
   // Save cart to localStorage whenever it changes
   useEffect(() => {
-    localStorage.setItem('smartpick_cart', JSON.stringify(cartItems));
+    try {
+      localStorage.setItem('smartpick_cart', JSON.stringify(cartItems));
+    } catch (error) {
+      console.error('Error saving cart to localStorage:', error);
+    }
   }, [cartItems]);
 
-  // Save wishlist to localStorage whenever it changes
-  useEffect(() => {
-    localStorage.setItem('smartpick_wishlist', JSON.stringify(wishlistItems));
-  }, [wishlistItems]);
-
   const addToCart = (product, quantity = 1) => {
+    if (!product || !product.id) {
+      console.error('Invalid product data');
+      return;
+    }
+
     setCartItems(prevItems => {
       const existingItem = prevItems.find(item => item.id === product.id);
       
@@ -54,8 +71,16 @@ export const CartProvider = ({ children }) => {
     });
   };
 
-  const updateCartQuantity = (productId, quantity) => {
-    if (quantity <= 0) {
+  const removeFromCart = (productId) => {
+    if (!productId) return;
+    
+    setCartItems(prevItems => prevItems.filter(item => item.id !== productId));
+  };
+
+  const updateQuantity = (productId, newQuantity) => {
+    if (!productId || newQuantity < 0) return;
+    
+    if (newQuantity === 0) {
       removeFromCart(productId);
       return;
     }
@@ -63,68 +88,33 @@ export const CartProvider = ({ children }) => {
     setCartItems(prevItems =>
       prevItems.map(item =>
         item.id === productId
-          ? { ...item, quantity }
+          ? { ...item, quantity: newQuantity }
           : item
       )
     );
   };
 
-  const removeFromCart = (productId) => {
-    setCartItems(prevItems => prevItems.filter(item => item.id !== productId));
-  };
-
   const clearCart = () => {
+    console.log('Clearing cart...'); // Debug log
     setCartItems([]);
+    try {
+      localStorage.removeItem('smartpick_cart');
+      console.log('Cart cleared from localStorage'); // Debug log
+    } catch (error) {
+      console.error('Error clearing cart from localStorage:', error);
+    }
   };
 
-  const addToWishlist = (product) => {
-    setWishlistItems(prevItems => {
-      const exists = prevItems.find(item => item.id === product.id);
-      if (!exists) {
-        return [...prevItems, product];
-      }
-      return prevItems;
-    });
-  };
-
-  const removeFromWishlist = (productId) => {
-    setWishlistItems(prevItems => prevItems.filter(item => item.id !== productId));
-  };
-
-  const isInWishlist = (productId) => {
-    return wishlistItems.some(item => item.id === productId);
-  };
-
-  const isInCart = (productId) => {
-    return cartItems.some(item => item.id === productId);
-  };
-
-  const getCartTotal = () => {
-    return cartItems.reduce((total, item) => {
-      const price = item.discount > 0 
-        ? item.price * (1 - item.discount / 100)
-        : item.price;
-      return total + (price * item.quantity);
-    }, 0);
-  };
-
-  const getCartItemsCount = () => {
-    return cartItems.reduce((total, item) => total + item.quantity, 0);
-  };
+  // Calculate cart count
+  const cartCount = Array.isArray(cartItems) ? cartItems.reduce((count, item) => count + item.quantity, 0) : 0;
 
   const value = {
-    cartItems,
-    wishlistItems,
+    cartItems: cartItems || [],
+    cartCount,
     addToCart,
-    updateCartQuantity,
     removeFromCart,
-    clearCart,
-    addToWishlist,
-    removeFromWishlist,
-    isInWishlist,
-    isInCart,
-    getCartTotal,
-    getCartItemsCount
+    updateQuantity,
+    clearCart
   };
 
   return (
