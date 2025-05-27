@@ -2,14 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Button, Badge, Carousel } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../../contexts/CartContext';
+import { useWishlist } from '../../contexts/WishlistContext';
 import './Home.css';
 
 const HomePage = () => {
   const navigate = useNavigate();
   const { addToCart } = useCart();
-  
-  // Local wishlist state - NO CONTEXT DEPENDENCIES
-  const [wishlist, setWishlist] = useState([]);
+  const { toggleWishlist, isInWishlist } = useWishlist();
   
   // Fixed products data
   const products = [
@@ -51,34 +50,6 @@ const HomePage = () => {
     }
   ];
 
-  // Load wishlist from localStorage
-  useEffect(() => {
-    const saved = localStorage.getItem('smartpick_wishlist');
-    if (saved) {
-      try {
-        setWishlist(JSON.parse(saved));
-      } catch (e) {
-        setWishlist([]);
-      }
-    }
-  }, []);
-
-  // Save wishlist to localStorage
-  useEffect(() => {
-    localStorage.setItem('smartpick_wishlist', JSON.stringify(wishlist));
-  }, [wishlist]);
-
-  // Wishlist functions with DIFFERENT NAMES
-  const checkWishlist = (id) => wishlist.some(item => item.id === id);
-  
-  const toggleWishlist = (product) => {
-    if (checkWishlist(product.id)) {
-      setWishlist(prev => prev.filter(item => item.id !== product.id));
-    } else {
-      setWishlist(prev => [...prev, product]);
-    }
-  };
-
   // Define categories array properly
   const categories = [
     { id: 1, name: 'Pens & Writing', icon: 'fas fa-pen', image: 'https://images.unsplash.com/photo-1583485088034-697b5bc63fc2?w=300&h=200&fit=crop', link: '/products?category=pens' },
@@ -97,7 +68,7 @@ const HomePage = () => {
 
   // Render individual product
   const ProductCard = ({ product }) => (
-    <Card className="product-card h-100 hover-lift" role="article" aria-labelledby={`product-title-${product.id}`}>
+    <Card className="product-card h-100">
       <div className="product-image-container">
         <Card.Img 
           variant="top" 
@@ -106,81 +77,92 @@ const HomePage = () => {
           className="product-image"
           onClick={() => navigate(`/products/${product.id}`)}
           style={{ cursor: 'pointer' }}
-          tabIndex="0"
-          role="button"
-          aria-label={`View details for ${product.name}`}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault();
-              navigate(`/products/${product.id}`);
-            }
-          }}
         />
         <div className="product-overlay">
           <Button
-            variant="outline-light"
+            variant="light"
             size="sm"
-            className="wishlist-btn button-bounce"
+            className="wishlist-btn"
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
+              console.log('Wishlist button clicked for:', product); // Debug log
               toggleWishlist(product);
+              // Show immediate visual feedback
+              const btn = e.currentTarget;
+              const icon = btn.querySelector('i');
+              if (isInWishlist(product.id)) {
+                icon.style.color = '#dc3545';
+                btn.title = 'Remove from wishlist';
+              } else {
+                icon.style.color = '';
+                btn.title = 'Add to wishlist';
+              }
             }}
-            aria-label={checkWishlist(product.id) ? `Remove ${product.name} from wishlist` : `Add ${product.name} to wishlist`}
-            aria-pressed={checkWishlist(product.id)}
+            aria-label={isInWishlist(product.id) ? `Remove ${product.name} from wishlist` : `Add ${product.name} to wishlist`}
+            aria-pressed={isInWishlist(product.id)}
+            title={isInWishlist(product.id) ? 'Remove from wishlist' : 'Add to wishlist'}
           >
-            <i className={`fas fa-heart ${checkWishlist(product.id) ? 'text-danger' : ''}`} aria-hidden="true"></i>
+            <i className={`fas fa-heart ${isInWishlist(product.id) ? 'text-danger' : ''}`}></i>
           </Button>
           <Button
-            variant="outline-light"
+            variant="light"
             size="sm"
-            className="quick-view-btn button-bounce"
+            className="quick-view-btn"
             onClick={() => navigate(`/products/${product.id}`)}
             aria-label={`Quick view for ${product.name}`}
+            title="Quick view"
           >
-            <i className="fas fa-eye" aria-hidden="true"></i>
+            <i className="fas fa-eye"></i>
           </Button>
         </div>
         {product.originalPrice > product.price && (
-          <Badge bg="danger" className="discount-badge" role="text" aria-label={`${Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)} percent discount`}>
+          <Badge bg="danger" className="discount-badge">
             {Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}% OFF
           </Badge>
         )}
       </div>
       
       <Card.Body className="d-flex flex-column">
-        <div className="product-info flex-grow-1">
-          <h6 className="product-title" id={`product-title-${product.id}`}>{product.name}</h6>
-          <p className="product-brand text-muted">{product.brand}</p>
+        <div className="product-info">
+          <h6 className="product-title">{product.name}</h6>
+          <p className="product-brand">{product.brand}</p>
           
-          <div className="product-rating mb-2" role="img" aria-label={`Rating: ${product.rating.average} out of 5 stars, based on ${product.rating.count} reviews`}>
+          <div className="product-rating">
             {[...Array(5)].map((_, i) => (
               <i 
                 key={i} 
                 className={`fas fa-star ${i < Math.floor(product.rating.average) ? 'text-warning' : 'text-muted'}`}
-                aria-hidden="true"
               ></i>
             ))}
-            <span className="rating-count ms-2" aria-label={`${product.rating.count} customer reviews`}>
-              ({product.rating.count})
-            </span>
+            <span className="rating-count ms-1">({product.rating.count})</span>
           </div>
           
           <div className="product-price">
-            <span className="current-price" aria-label={`Current price: ${product.price} rupees`}>₹{product.price}</span>
+            <span className="current-price">₹{product.price.toLocaleString()}</span>
             {product.originalPrice > product.price && (
-              <span className="original-price ms-2" aria-label={`Original price: ${product.originalPrice} rupees`}>₹{product.originalPrice}</span>
+              <span className="original-price ms-2">₹{product.originalPrice.toLocaleString()}</span>
             )}
           </div>
         </div>
         
         <Button 
           variant="primary" 
-          className="add-to-cart-btn w-100 mt-3 button-bounce"
-          onClick={() => addToCart(product)}
-          aria-label={`Add ${product.name} to shopping cart`}
+          className="add-to-cart-btn mt-auto"
+          onClick={() => {
+            addToCart(product);
+            // Optional: Show a quick feedback
+            const btn = document.activeElement;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-check me-2"></i>Added!';
+            btn.disabled = true;
+            setTimeout(() => {
+              btn.innerHTML = originalText;
+              btn.disabled = false;
+            }, 1500);
+          }}
         >
-          <i className="fas fa-shopping-cart me-2" aria-hidden="true"></i>
+          <i className="fas fa-shopping-cart me-2"></i>
           Add to Cart
         </Button>
       </Card.Body>

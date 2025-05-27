@@ -5,15 +5,7 @@ const WishlistContext = createContext();
 export const useWishlist = () => {
   const context = useContext(WishlistContext);
   if (!context) {
-    // Return safe defaults instead of throwing error
-    return {
-      wishlistItems: [],
-      wishlistCount: 0,
-      addToWishlist: () => console.warn('WishlistProvider not found'),
-      removeFromWishlist: () => console.warn('WishlistProvider not found'),
-      isInWishlist: () => false,
-      clearWishlist: () => console.warn('WishlistProvider not found')
-    };
+    throw new Error('useWishlist must be used within a WishlistProvider');
   }
   return context;
 };
@@ -21,25 +13,26 @@ export const useWishlist = () => {
 export const WishlistProvider = ({ children }) => {
   const [wishlistItems, setWishlistItems] = useState([]);
 
-  // Load wishlist from localStorage on init
+  // Load wishlist from localStorage on mount
   useEffect(() => {
     try {
       const savedWishlist = localStorage.getItem('smartpick_wishlist');
+      console.log('Loading wishlist from localStorage:', savedWishlist); // Debug log
       if (savedWishlist) {
-        const parsedWishlist = JSON.parse(savedWishlist);
-        if (Array.isArray(parsedWishlist)) {
-          setWishlistItems(parsedWishlist);
-        }
+        const parsed = JSON.parse(savedWishlist);
+        setWishlistItems(parsed);
+        console.log('Wishlist loaded:', parsed); // Debug log
       }
     } catch (error) {
       console.error('Error loading wishlist from localStorage:', error);
-      localStorage.removeItem('smartpick_wishlist');
+      setWishlistItems([]);
     }
   }, []);
 
   // Save wishlist to localStorage whenever it changes
   useEffect(() => {
     try {
+      console.log('Saving wishlist to localStorage:', wishlistItems); // Debug log
       localStorage.setItem('smartpick_wishlist', JSON.stringify(wishlistItems));
     } catch (error) {
       console.error('Error saving wishlist to localStorage:', error);
@@ -47,50 +40,57 @@ export const WishlistProvider = ({ children }) => {
   }, [wishlistItems]);
 
   const addToWishlist = (product) => {
-    if (!product || !product.id) {
-      console.error('Invalid product data');
-      return;
-    }
-
-    setWishlistItems(prevItems => {
-      const exists = prevItems.find(item => item.id === product.id);
+    console.log('Adding to wishlist:', product); // Debug log
+    setWishlistItems(prev => {
+      const exists = prev.find(item => item.id === product.id);
       if (exists) {
-        return prevItems; // Already in wishlist
+        console.log('Product already in wishlist'); // Debug log
+        return prev; // Don't add if already exists
       }
-      return [...prevItems, product];
+      const newWishlist = [...prev, product];
+      console.log('New wishlist after adding:', newWishlist); // Debug log
+      return newWishlist;
     });
   };
 
   const removeFromWishlist = (productId) => {
-    if (!productId) return;
-    
-    setWishlistItems(prevItems => 
-      prevItems.filter(item => item.id !== productId)
-    );
+    console.log('Removing from wishlist:', productId); // Debug log
+    setWishlistItems(prev => {
+      const newWishlist = prev.filter(item => item.id !== productId);
+      console.log('New wishlist after removing:', newWishlist); // Debug log
+      return newWishlist;
+    });
   };
 
   const isInWishlist = (productId) => {
-    if (!productId || !Array.isArray(wishlistItems)) return false;
-    return wishlistItems.some(item => item.id === productId);
+    const inWishlist = wishlistItems.some(item => item.id === productId);
+    console.log(`Product ${productId} in wishlist:`, inWishlist); // Debug log
+    return inWishlist;
   };
 
-  const clearWishlist = () => {
-    setWishlistItems([]);
-    try {
-      localStorage.removeItem('smartpick_wishlist');
-    } catch (error) {
-      console.error('Error clearing wishlist from localStorage:', error);
+  const toggleWishlist = (product) => {
+    console.log('Toggling wishlist for:', product); // Debug log
+    if (isInWishlist(product.id)) {
+      removeFromWishlist(product.id);
+    } else {
+      addToWishlist(product);
     }
   };
 
-  const wishlistCount = Array.isArray(wishlistItems) ? wishlistItems.length : 0;
+  const clearWishlist = () => {
+    console.log('Clearing wishlist'); // Debug log
+    setWishlistItems([]);
+  };
+
+  const wishlistCount = wishlistItems.length;
 
   const value = {
-    wishlistItems: wishlistItems || [],
+    wishlistItems,
     wishlistCount,
     addToWishlist,
     removeFromWishlist,
     isInWishlist,
+    toggleWishlist,
     clearWishlist
   };
 

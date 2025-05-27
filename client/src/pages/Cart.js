@@ -1,22 +1,27 @@
 import React from 'react';
-import { Container, Row, Col, Card, Button, Form, Badge } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
+import { Container, Row, Col, Card, Button, Form, Badge, Alert } from 'react-bootstrap';
+import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
 import './Cart.css';
 
 const Cart = () => {
-  const { 
-    cartItems, 
-    updateCartQuantity, 
-    removeFromCart, 
-    getCartTotal, 
-    getCartItemsCount,
-    clearCart 
-  } = useCart();
+  const { cartItems, updateQuantity, removeFromCart, cartCount } = useCart();
+  const navigate = useNavigate();
+
+  // Calculate totals properly
+  const subtotal = cartItems.reduce((total, item) => {
+    return total + (item.price * item.quantity);
+  }, 0);
+
+  const shipping = subtotal > 500 ? 0 : 50;
+  const tax = subtotal * 0.18; // 18% GST
+  const total = subtotal + shipping + tax;
+
+  console.log('Cart totals:', { subtotal, shipping, tax, total }); // Debug log
 
   const handleQuantityChange = (productId, newQuantity) => {
     if (newQuantity > 0) {
-      updateCartQuantity(productId, newQuantity);
+      updateQuantity(productId, newQuantity);
     }
   };
 
@@ -56,7 +61,7 @@ const Cart = () => {
             <div className="page-header">
               <h1>Shopping Cart</h1>
               <p className="text-muted">
-                {getCartItemsCount()} item{getCartItemsCount() !== 1 ? 's' : ''} in your cart
+                {cartCount} item{cartCount !== 1 ? 's' : ''} in your cart
               </p>
             </div>
           </Col>
@@ -175,66 +180,62 @@ const Cart = () => {
             </Card>
           </Col>
 
-          {/* Order Summary */}
+          {/* Cart Summary */}
           <Col lg={4}>
-            <Card className="order-summary-card sticky-top">
+            <Card className="cart-summary sticky-top" style={{ top: '140px' }}>
               <Card.Header>
                 <h5 className="mb-0">Order Summary</h5>
               </Card.Header>
               <Card.Body>
-                <div className="summary-item">
-                  <span>Subtotal ({getCartItemsCount()} items)</span>
-                  <span>{formatPrice(getCartTotal())}</span>
-                </div>
-                <div className="summary-item">
-                  <span>Shipping</span>
-                  <span className="text-success">FREE</span>
-                </div>
-                <div className="summary-item">
-                  <span>Tax</span>
-                  <span>{formatPrice(getCartTotal() * 0.18)}</span>
-                </div>
-                <hr />
-                <div className="summary-total">
-                  <span>Total</span>
-                  <span>{formatPrice(getCartTotal() + (getCartTotal() * 0.18))}</span>
+                <div className="summary-row">
+                  <span>Subtotal ({cartCount} items):</span>
+                  <span>₹{subtotal.toLocaleString()}</span>
                 </div>
                 
-                <div className="checkout-actions">
-                  <Button
-                    variant="primary"
-                    size="lg"
-                    className="w-100 mb-3"
-                    as={Link}
-                    to="/checkout"
-                  >
-                    Proceed to Checkout
-                  </Button>
-                  <Button
-                    variant="outline-primary"
-                    size="lg"
-                    className="w-100"
-                    as={Link}
-                    to="/"
-                  >
-                    Continue Shopping
-                  </Button>
+                <div className="summary-row">
+                  <span>Shipping:</span>
+                  <span className={shipping === 0 ? 'text-success fw-bold' : ''}>
+                    {shipping === 0 ? 'FREE' : `₹${shipping}`}
+                  </span>
+                </div>
+                
+                <div className="summary-row">
+                  <span>Tax (GST 18%):</span>
+                  <span>₹{Math.round(tax).toLocaleString()}</span>
+                </div>
+                
+                <hr />
+                
+                <div className="summary-row total-row">
+                  <strong>Total:</strong>
+                  <strong className="text-primary fs-5">₹{Math.round(total).toLocaleString()}</strong>
                 </div>
 
-                <div className="security-info">
-                  <div className="security-item">
-                    <i className="fas fa-shield-alt text-success"></i>
-                    <span>Secure Checkout</span>
-                  </div>
-                  <div className="security-item">
-                    <i className="fas fa-truck text-primary"></i>
-                    <span>Fast Delivery</span>
-                  </div>
-                  <div className="security-item">
-                    <i className="fas fa-undo text-warning"></i>
-                    <span>Easy Returns</span>
-                  </div>
-                </div>
+                {subtotal < 500 && (
+                  <Alert variant="info" className="mt-3 small">
+                    <i className="fas fa-truck me-2"></i>
+                    Add ₹{Math.round(500 - subtotal).toLocaleString()} more for free shipping!
+                  </Alert>
+                )}
+                
+                <Button 
+                  variant="primary" 
+                  size="lg" 
+                  className="w-100 mt-3"
+                  onClick={() => navigate('/checkout')}
+                  disabled={cartItems.length === 0}
+                >
+                  Proceed to Checkout
+                  <i className="fas fa-arrow-right ms-2"></i>
+                </Button>
+                
+                <Button 
+                  variant="outline-secondary" 
+                  className="w-100 mt-2"
+                  onClick={() => navigate('/products')}
+                >
+                  Continue Shopping
+                </Button>
               </Card.Body>
             </Card>
           </Col>

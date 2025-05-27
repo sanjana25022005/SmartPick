@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Button, Badge, Form, Pagination } from 'react-bootstrap';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
+import { useWishlist } from '../contexts/WishlistContext';
 
 const Products = () => {
   const navigate = useNavigate();
   const { addToCart } = useCart();
+  const { toggleWishlist, isInWishlist } = useWishlist();
   const [searchParams] = useSearchParams();
   
   const [products] = useState([
@@ -118,26 +120,47 @@ const Products = () => {
   }, [selectedCategory, searchTerm, sortBy, products]);
 
   const ProductCard = ({ product }) => (
-    <Card className="h-100 product-card" role="article" aria-labelledby={`product-${product.id}-title`}>
+    <Card className="h-100 product-card">
       <div className="position-relative">
         <Card.Img
           variant="top"
           src={product.image}
           alt={`${product.name} by ${product.brand} - High quality stationery product`}
-          style={{ height: '250px', objectFit: 'cover', cursor: 'pointer' }}
+          style={{ height: '280px', objectFit: 'cover', cursor: 'pointer' }}
           onClick={() => navigate(`/products/${product.id}`)}
-          tabIndex="0"
-          role="button"
-          aria-label={`View details for ${product.name}`}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault();
-              navigate(`/products/${product.id}`);
-            }
-          }}
         />
+        
+        {/* Wishlist button - always visible on products page */}
+        <Button
+          variant={isInWishlist(product.id) ? "danger" : "outline-light"}
+          size="sm"
+          className="position-absolute wishlist-btn"
+          style={{ 
+            top: '10px', 
+            right: '10px',
+            width: '40px',
+            height: '40px',
+            borderRadius: '50%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backdropFilter: 'blur(10px)',
+            background: isInWishlist(product.id) ? '#dc3545' : 'rgba(255, 255, 255, 0.9)',
+            border: 'none',
+            zIndex: 2
+          }}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            toggleWishlist(product);
+          }}
+          title={isInWishlist(product.id) ? 'Remove from wishlist' : 'Add to wishlist'}
+        >
+          <i className={`fas fa-heart ${isInWishlist(product.id) ? 'text-white' : 'text-danger'}`}></i>
+        </Button>
+        
         {product.originalPrice > product.price && (
-          <Badge bg="danger" className="position-absolute top-0 start-0 m-2" role="text" aria-label={`${Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)} percent discount`}>
+          <Badge bg="danger" className="position-absolute top-0 start-0 m-2">
             {Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}% OFF
           </Badge>
         )}
@@ -145,27 +168,26 @@ const Products = () => {
       
       <Card.Body className="d-flex flex-column">
         <div className="flex-grow-1">
-          <h6 className="card-title" id={`product-${product.id}-title`}>{product.name}</h6>
+          <h6 className="card-title">{product.name}</h6>
           <p className="text-muted small">{product.brand}</p>
           
-          <div className="mb-2" role="img" aria-label={`Rating: ${product.rating.average} out of 5 stars, based on ${product.rating.count} reviews`}>
+          <div className="mb-2">
             {[...Array(5)].map((_, i) => (
               <i
                 key={i}
                 className={`fas fa-star ${i < Math.floor(product.rating.average) ? 'text-warning' : 'text-muted'}`}
                 style={{ fontSize: '0.8rem' }}
-                aria-hidden="true"
               ></i>
             ))}
-            <span className="text-muted small ms-2" aria-label={`${product.rating.count} customer reviews`}>
-              ({product.rating.count})
-            </span>
+            <span className="text-muted small ms-2">({product.rating.count})</span>
           </div>
           
           <div className="mb-3">
-            <span className="h5 text-primary" aria-label={`Current price: ${product.price} rupees`}>₹{product.price}</span>
+            <span className="h5 text-primary">₹{product.price.toLocaleString()}</span>
             {product.originalPrice > product.price && (
-              <span className="text-muted text-decoration-line-through ms-2" aria-label={`Original price: ${product.originalPrice} rupees`}>₹{product.originalPrice}</span>
+              <span className="text-muted text-decoration-line-through ms-2">
+                ₹{product.originalPrice.toLocaleString()}
+              </span>
             )}
           </div>
         </div>
@@ -174,9 +196,8 @@ const Products = () => {
           variant="primary"
           className="w-100"
           onClick={() => addToCart(product)}
-          aria-label={`Add ${product.name} to shopping cart`}
         >
-          <i className="fas fa-shopping-cart me-2" aria-hidden="true"></i>
+          <i className="fas fa-shopping-cart me-2"></i>
           Add to Cart
         </Button>
       </Card.Body>

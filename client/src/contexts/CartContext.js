@@ -110,17 +110,25 @@ export const CartProvider = ({ children }) => {
     return cartItems.some(item => item.id === productId);
   };
 
-  // Calculate cart count
+  // Calculate cart count and total
   const cartCount = Array.isArray(cartItems) ? cartItems.reduce((count, item) => count + item.quantity, 0) : 0;
+  
+  // Calculate cart total
+  const cartTotal = Array.isArray(cartItems) ? cartItems.reduce((total, item) => {
+    return total + (item.price * item.quantity);
+  }, 0) : 0;
+
+  console.log('Cart context - items:', cartItems, 'total:', cartTotal); // Debug log
 
   const value = {
     cartItems: cartItems || [],
     cartCount,
+    cartTotal,
     addToCart,
     removeFromCart,
     updateQuantity,
     clearCart,
-    isInCart // Add this function to the context value
+    isInCart
   };
 
   return (

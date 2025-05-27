@@ -23,6 +23,8 @@ import AdminAnalytics from './pages/Admin/Analytics';
 import Orders from './pages/Orders';
 import Blog from './pages/Blog/Blog';
 import BlogPost from './pages/BlogPost';
+import Profile from './pages/Profile';
+import Wishlist from './pages/Wishlist';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 import './styles/theme.css';
@@ -52,6 +54,11 @@ function App() {
                       <Cart />
                     </ProtectedRoute>
                   } />
+                  <Route path="/profile" element={
+                    <ProtectedRoute>
+                      <Profile />
+                    </ProtectedRoute>
+                  } />
                   <Route path="/orders" element={
                     <ProtectedRoute>
                       <Orders />
@@ -65,6 +72,11 @@ function App() {
                   <Route path="/order-confirmation" element={
                     <ProtectedRoute>
                       <OrderConfirmation />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/wishlist" element={
+                    <ProtectedRoute>
+                      <Wishlist />
                     </ProtectedRoute>
                   } />
                   

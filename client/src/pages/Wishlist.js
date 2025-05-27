@@ -1,152 +1,167 @@
-import React from 'react';
-import { Container, Row, Col, Card, Button, Badge } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Container, Row, Col, Card, Button, Alert } from 'react-bootstrap';
+import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
+import { useWishlist } from '../contexts/WishlistContext';
 import './Wishlist.css';
 
 const Wishlist = () => {
-  const { 
-    wishlistItems, 
-    removeFromWishlist, 
-    addToCart, 
-    isInCart 
-  } = useCart();
+  const navigate = useNavigate();
+  const { addToCart } = useCart();
+  const { wishlistItems, removeFromWishlist, clearWishlist } = useWishlist();
 
-  const formatPrice = (price) => {
+  console.log('Wishlist page - current items:', wishlistItems); // Debug log
+
+  const moveToCart = (product) => {
+    addToCart(product);
+    removeFromWishlist(product.id);
+    alert(`${product.name} moved to cart!`);
+  };
+
+  const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
       currency: 'INR'
-    }).format(price);
+    }).format(amount);
   };
 
-  const handleAddToCart = (product) => {
-    addToCart(product);
-  };
-
-  if (wishlistItems.length === 0) {
-    return (
-      <div className="wishlist-page">
-        <Container className="py-5">
-          <div className="empty-wishlist">
-            <div className="empty-wishlist-icon">
-              <i className="fas fa-heart"></i>
-            </div>
-            <h2>Your wishlist is empty</h2>
-            <p className="text-muted">
-              Save items you love by clicking the heart icon on products.
-            </p>
-            <Button as={Link} to="/" variant="primary" size="lg">
-              Start Shopping
-            </Button>
-          </div>
-        </Container>
+  const WishlistCard = ({ product }) => (
+    <Card className="h-100 wishlist-card hover-lift">
+      <div className="position-relative">
+        <Card.Img
+          variant="top"
+          src={product.image}
+          alt={`${product.name} by ${product.brand}`}
+          style={{ height: '250px', objectFit: 'cover', cursor: 'pointer' }}
+          onClick={() => navigate(`/products/${product.id}`)}
+        />
+        <Button
+          variant="danger"
+          size="sm"
+          className="position-absolute top-0 end-0 m-2 rounded-circle"
+          onClick={() => removeFromWishlist(product.id)}
+          style={{ width: '35px', height: '35px' }}
+          aria-label={`Remove ${product.name} from wishlist`}
+        >
+          <i className="fas fa-times"></i>
+        </Button>
       </div>
-    );
-  }
+      
+      <Card.Body className="d-flex flex-column">
+        <div className="flex-grow-1">
+          <h6 className="card-title">{product.name}</h6>
+          <p className="text-muted small">{product.brand}</p>
+          
+          <div className="mb-2">
+            {[...Array(5)].map((_, i) => (
+              <i
+                key={i}
+                className={`fas fa-star ${i < Math.floor(product.rating?.average || 0) ? 'text-warning' : 'text-muted'}`}
+                style={{ fontSize: '0.8rem' }}
+              ></i>
+            ))}
+            <span className="text-muted small ms-2">({product.rating?.count || 0})</span>
+          </div>
+          
+          <div className="mb-3">
+            <span className="h5 text-primary">{formatCurrency(product.price)}</span>
+            {product.originalPrice && product.originalPrice > product.price && (
+              <span className="text-muted text-decoration-line-through ms-2">
+                {formatCurrency(product.originalPrice)}
+              </span>
+            )}
+          </div>
+        </div>
+        
+        <div className="d-grid gap-2">
+          <Button
+            variant="primary"
+            onClick={() => moveToCart(product)}
+            aria-label={`Move ${product.name} to cart`}
+          >
+            <i className="fas fa-shopping-cart me-2"></i>
+            Move to Cart
+          </Button>
+          <Button
+            variant="outline-secondary"
+            onClick={() => navigate(`/products/${product.id}`)}
+            aria-label={`View details for ${product.name}`}
+          >
+            View Details
+          </Button>
+        </div>
+      </Card.Body>
+    </Card>
+  );
 
   return (
-    <div className="wishlist-page">
-      <Container className="py-4">
-        <Row>
+    <div style={{ marginTop: '120px', background: '#f8f9fa', minHeight: '80vh' }}>
+      <Container>
+        <Row className="py-4">
           <Col>
-            <div className="page-header">
-              <h1>My Wishlist</h1>
-              <p className="text-muted">
-                {wishlistItems.length} item{wishlistItems.length !== 1 ? 's' : ''} saved for later
-              </p>
+            <div className="d-flex justify-content-between align-items-center mb-4">
+              <h2>My Wishlist</h2>
+              <span className="text-muted">({wishlistItems.length} items)</span>
             </div>
-          </Col>
-        </Row>
 
-        <Row>
-          {wishlistItems.map((product) => (
-            <Col lg={3} md={4} sm={6} key={product.id} className="mb-4">
-              <Card className="wishlist-item-card card-hover-effect">
-                <div className="product-image-container">
-                  <Card.Img 
-                    variant="top" 
-                    src={product.image || product.images?.[0]} 
-                    alt={product.name}
-                    className="product-image"
-                  />
-                  {product.discount > 0 && (
-                    <Badge bg="danger" className="discount-badge">
-                      {product.discount}% OFF
-                    </Badge>
-                  )}
-                  <Button
-                    variant="danger"
-                    size="sm"
-                    onClick={() => removeFromWishlist(product.id)}
-                    className="remove-wishlist-btn"
-                  >
-                    <i className="fas fa-times"></i>
-                  </Button>
-                </div>
-                
+            {wishlistItems.length === 0 ? (
+              <Card className="text-center py-5">
                 <Card.Body>
-                  <div className="product-brand">{product.brand}</div>
-                  <Card.Title className="product-title">
-                    <Link to={`/product/${product.id}`}>
-                      {product.name}
-                    </Link>
-                  </Card.Title>
-                  
-                  {product.rating && (
-                    <div className="product-rating">
-                      <span className="rating-stars">
-                        {'★'.repeat(Math.floor(product.rating))}
-                        {'☆'.repeat(5 - Math.floor(product.rating))}
-                      </span>
-                      <span className="rating-text">
-                        {product.rating} ({product.reviews || 0} reviews)
-                      </span>
-                    </div>
-                  )}
-                  
-                  <div className="product-price">
-                    <span className="current-price">
-                      {formatPrice(product.price)}
-                    </span>
-                    {product.originalPrice && (
-                      <span className="original-price">
-                        {formatPrice(product.originalPrice)}
-                      </span>
-                    )}
-                  </div>
-                  
-                  <div className="product-actions">
-                    <Button
-                      variant="primary"
-                      size="sm"
-                      onClick={() => handleAddToCart(product)}
-                      disabled={isInCart(product.id)}
-                      className="w-100 add-to-cart-btn"
-                    >
-                      {isInCart(product.id) ? (
-                        <>
-                          <i className="fas fa-check me-1"></i>
-                          Added to Cart
-                        </>
-                      ) : (
-                        <>
-                          <i className="fas fa-shopping-cart me-1"></i>
-                          Add to Cart
-                        </>
-                      )}
-                    </Button>
-                  </div>
+                  <i className="fas fa-heart fa-4x text-muted mb-4"></i>
+                  <h4>Your wishlist is empty</h4>
+                  <p className="text-muted mb-4">
+                    Save items you love to your wishlist and shop them later.
+                  </p>
+                  <Button as={Link} to="/products" variant="primary" size="lg">
+                    <i className="fas fa-shopping-bag me-2"></i>
+                    Continue Shopping
+                  </Button>
                 </Card.Body>
               </Card>
-            </Col>
-          ))}
-        </Row>
-
-        <Row className="mt-4">
-          <Col className="text-center">
-            <Button as={Link} to="/" variant="outline-primary" size="lg">
-              Continue Shopping
-            </Button>
+            ) : (
+              <>
+                <Row>
+                  {wishlistItems.map(product => (
+                    <Col key={product.id} lg={3} md={6} sm={6} xs={12} className="mb-4">
+                      <WishlistCard product={product} />
+                    </Col>
+                  ))}
+                </Row>
+                
+                <Row className="mt-4">
+                  <Col className="text-center">
+                    <Button
+                      variant="success"
+                      size="lg"
+                      className="me-3"
+                      onClick={() => {
+                        wishlistItems.forEach(product => addToCart(product));
+                        clearWishlist();
+                        alert('All items moved to cart!');
+                        navigate('/cart');
+                      }}
+                      disabled={wishlistItems.length === 0}
+                    >
+                      <i className="fas fa-shopping-cart me-2"></i>
+                      Move All to Cart
+                    </Button>
+                    <Button
+                      variant="outline-danger"
+                      size="lg"
+                      onClick={() => {
+                        if (window.confirm('Are you sure you want to clear your wishlist?')) {
+                          clearWishlist();
+                        }
+                      }}
+                      disabled={wishlistItems.length === 0}
+                    >
+                      <i className="fas fa-trash me-2"></i>
+                      Clear Wishlist
+                    </Button>
+                  </Col>
+                </Row>
+              </>
+            )}
           </Col>
         </Row>
       </Container>

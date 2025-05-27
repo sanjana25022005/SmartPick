@@ -109,14 +109,23 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const updateUser = (userData) => {
+    setUser(userData);
+    try {
+      localStorage.setItem('smartpick_user', JSON.stringify(userData));
+    } catch (error) {
+      console.error('Error saving user data:', error);
+    }
+  };
+
   const value = {
     user,
-    loading,
-    isAuthenticated,
     login,
-    register,
     logout,
-    updateProfile
+    register,
+    updateUser, // Add this function
+    isAuthenticated,
+    loading
   };
 
   return (

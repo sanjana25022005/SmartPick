@@ -6,7 +6,7 @@ import { useAuth } from '../contexts/AuthContext';
 import './Checkout.css';
 
 const Checkout = () => {
-  const { cartItems, getCartTotal, clearCart } = useCart();
+  const { cartItems, cartCount, clearCart } = useCart();
   const { user } = useAuth();
   const navigate = useNavigate();
   
@@ -28,17 +28,75 @@ const Checkout = () => {
     cvv: '',
     name: ''
   });
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState(null);
 
-  const subtotal = getCartTotal();
-  const tax = subtotal * 0.18;
+  // Calculate totals properly
+  const subtotal = cartItems.reduce((total, item) => {
+    return total + (item.price * item.quantity);
+  }, 0);
+
   const shipping = subtotal > 500 ? 0 : 50;
-  const total = subtotal + tax + shipping;
+  const tax = subtotal * 0.18; // 18% GST
+  const total = subtotal + shipping + tax;
 
   const handlePlaceOrder = async () => {
     // Mock order placement
     const orderId = 'ORD' + Date.now();
     clearCart();
     navigate(`/order-confirmation/${orderId}`);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      // Create order object with correct totals
+      const orderData = {
+        id: `ORD${Date.now()}`,
+        userId: user?.id,
+        customerInfo: shippingAddress,
+        items: cartItems.map(item => ({
+          ...item,
+          totalPrice: item.price * item.quantity
+        })),
+        orderSummary: {
+          subtotal: Math.round(subtotal * 100) / 100,
+          shipping: Math.round(shipping * 100) / 100,
+          tax: Math.round(tax * 100) / 100,
+          total: Math.round(total * 100) / 100
+        },
+        paymentMethod: paymentMethod,
+        status: 'confirmed',
+        orderDate: new Date().toISOString(),
+        estimatedDelivery: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+      };
+
+      console.log('Order data:', orderData); // Debug log
+
+      // Save order to localStorage
+      const existingOrders = JSON.parse(localStorage.getItem('smartpick_orders') || '[]');
+      existingOrders.push(orderData);
+      localStorage.setItem('smartpick_orders', JSON.stringify(existingOrders));
+
+      // Clear cart
+      clearCart();
+
+      // Navigate to confirmation with order data
+      navigate('/order-confirmation', { 
+        state: { 
+          orderData,
+          message: 'Your order has been placed successfully!' 
+        } 
+      });
+
+    } catch (error) {
+      console.error('Order submission error:', error);
+      setMessage({ type: 'danger', text: 'Failed to place order. Please try again.' });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const steps = [
@@ -228,9 +286,10 @@ const Checkout = () => {
                     <Button 
                       variant="success" 
                       size="lg"
-                      onClick={handlePlaceOrder}
+                      onClick={handleSubmit}
+                      disabled={loading}
                     >
-                      Place Order
+                      {loading ? 'Placing Order...' : 'Place Order'}
                     </Button>
                   </div>
                 </Card.Body>
@@ -240,42 +299,62 @@ const Checkout = () => {
 
           {/* Order Summary Sidebar */}
           <Col lg={4}>
-            <Card className="order-summary-card sticky-top">
+            {/* Order Summary */}
+            <Card className="checkout-summary">
               <Card.Header>
                 <h5 className="mb-0">Order Summary</h5>
               </Card.Header>
               <Card.Body>
-                {/* Order items */}
-                {cartItems.map(item => (
-                  <div key={item.id} className="order-item">
-                    <img src={item.image} alt={item.name} className="item-image" />
-                    <div className="item-details">
-                      <h6>{item.name}</h6>
-                      <p>Qty: {item.quantity}</p>
-                      <p className="item-price">₹{item.price * item.quantity}</p>
+                {cartItems.map((item) => (
+                  <div key={item.id} className="d-flex justify-content-between align-items-center mb-2">
+                    <div className="d-flex align-items-center">
+                      <img 
+                        src={item.image} 
+                        alt={item.name}
+                        style={{ width: '40px', height: '40px', objectFit: 'cover' }}
+                        className="me-2 rounded"
+                      />
+                      <div>
+                        <small className="fw-bold">{item.name}</small>
+                        <br />
+                        <small className="text-muted">Qty: {item.quantity}</small>
+                      </div>
                     </div>
+                    <span className="fw-bold">₹{(item.price * item.quantity).toLocaleString()}</span>
                   </div>
                 ))}
                 
-                <div className="order-totals">
-                  <div className="total-line">
-                    <span>Subtotal:</span>
-                    <span>₹{subtotal}</span>
-                  </div>
-                  <div className="total-line">
-                    <span>Tax (18%):</span>
-                    <span>₹{tax.toFixed(2)}</span>
-                  </div>
-                  <div className="total-line">
-                    <span>Shipping:</span>
-                    <span>{shipping === 0 ? 'FREE' : `₹${shipping}`}</span>
-                  </div>
-                  <hr />
-                  <div className="total-line total">
-                    <span>Total:</span>
-                    <span>₹{total.toFixed(2)}</span>
-                  </div>
+                <hr />
+                
+                <div className="d-flex justify-content-between mb-2">
+                  <span>Subtotal:</span>
+                  <span>₹{subtotal.toLocaleString()}</span>
                 </div>
+                
+                <div className="d-flex justify-content-between mb-2">
+                  <span>Shipping:</span>
+                  <span className={shipping === 0 ? 'text-success' : ''}>
+                    {shipping === 0 ? 'FREE' : `₹${shipping}`}
+                  </span>
+                </div>
+                
+                <div className="d-flex justify-content-between mb-2">
+                  <span>Tax (GST 18%):</span>
+                  <span>₹{tax.toLocaleString()}</span>
+                </div>
+                
+                <hr />
+                
+                <div className="d-flex justify-content-between mb-3">
+                  <strong>Total:</strong>
+                  <strong className="text-primary">₹{total.toLocaleString()}</strong>
+                </div>
+
+                {subtotal < 500 && (
+                  <Alert variant="info" className="small mb-3">
+                    Add ₹{(500 - subtotal).toLocaleString()} more for free shipping!
+                  </Alert>
+                )}
               </Card.Body>
             </Card>
           </Col>

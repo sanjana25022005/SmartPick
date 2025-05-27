@@ -1,37 +1,27 @@
 import React, { useState } from 'react';
-import { Navbar, Nav, Container, NavDropdown, Form, Button, Badge } from 'react-bootstrap';
+import { Navbar, Nav, Container, Badge, Button, NavDropdown } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useCart } from '../../contexts/CartContext';
 import { useWishlist } from '../../contexts/WishlistContext';
 import { useTheme } from '../../contexts/ThemeContext';
-import ThemeToggle from '../UI/ThemeToggle';
 import VoiceSearch from '../Common/VoiceSearch';
 
 const Navigation = () => {
   const { user, logout, isAuthenticated } = useAuth();
   const { cartCount } = useCart();
+  const { wishlistCount } = useWishlist();
   const { darkMode, toggleTheme } = useTheme();
   const [expanded, setExpanded] = useState(false);
   const navigate = useNavigate();
-  
-  const [searchTerm, setSearchTerm] = useState('');
 
-  const handleLogout = () => {
-    logout();
-    navigate('/');
-  };
-
-  const handleSearch = () => {
-    if (searchTerm.trim()) {
-      navigate(`/products?search=${encodeURIComponent(searchTerm.trim())}`);
-    }
-  };
-
-  const handleSearchKeyPress = (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      handleSearch();
+  const handleLogout = async () => {
+    try {
+      await logout();
+      setExpanded(false);
+      navigate('/');
+    } catch (error) {
+      console.error('Logout error:', error);
     }
   };
 
@@ -163,6 +153,29 @@ const Navigation = () => {
             >
               <i className={`fas ${darkMode ? 'fa-sun' : 'fa-moon'}`} aria-hidden="true"></i>
             </Button>
+
+            {/* Wishlist */}
+            {isAuthenticated && (
+              <Nav.Link 
+                as={Link} 
+                to="/wishlist" 
+                className="position-relative me-3 wishlist-link"
+                aria-label={`Wishlist with ${wishlistCount} items`}
+                role="button"
+              >
+                <i className="fas fa-heart" aria-hidden="true"></i>
+                {wishlistCount > 0 && (
+                  <Badge 
+                    bg="danger" 
+                    pill 
+                    className="position-absolute top-0 start-100 translate-middle wishlist-badge"
+                    aria-label={`${wishlistCount} items in wishlist`}
+                  >
+                    {wishlistCount}
+                  </Badge>
+                )}
+              </Nav.Link>
+            )}
 
             {/* Cart */}
             <Nav.Link 
