@@ -99,7 +99,50 @@ That's it! You're ready to shop or manage the store.
 - **Order History** - Keep track of all purchases
 - **Mobile Optimized** - Touch-friendly on all devices
 
-## 🔧 Tech Details
+## 🔧 Key Technologies
 
-**Frontend Structure:**
-````
+- **React Router** for navigation
+- **Context API** for data sharing
+- **Bootstrap** for styling
+- **Font Awesome** for icons
+- **Web Speech API** for voice search
+
+## 🐛 Need Help?
+
+### Common Solutions:
+- **Won't start?** Make sure Node.js is installed
+- **Features broken?** Clear browser cache
+- **Voice search not working?** Check microphone permissions
+- **Styling issues?** Try refreshing the page
+
+### Get Support:
+- Check browser console for errors
+- Try incognito mode
+- Make sure JavaScript is enabled
+
+## 📈 What's Next?
+
+Future improvements planned:
+- Real payment processing
+- Email notifications
+- Mobile app version
+- More product categories
+- Advanced search filters
+- Social media sharing
+
+## 🎓 Perfect For
+
+- **Learning React** - Well-structured, commented code
+- **Portfolio Projects** - Professional-looking e-commerce site
+- **Small Businesses** - Ready-to-use online store
+- **Students** - Great example of modern web development
+
+## 💡 Why SmartPick?
+
+- **Complete Solution** - Everything you need for online selling
+- **Easy to Use** - Simple for both customers and admins
+- **Modern Design** - Looks professional and trustworthy
+- **Well Documented** - Easy to understand and modify
+- **Mobile Ready** - Works perfectly on all devices
+
+
