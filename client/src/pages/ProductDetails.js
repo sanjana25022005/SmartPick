@@ -138,7 +138,7 @@ const ProductDetails = () => {
               className="mb-4"
               aria-label="Go back to products page"
             >
-              <i className="fas fa-arrow-left me-2" aria-hidden="true"></i>
+              <i className="fas fa-arrow-left me-2"></i>
               Back to Products
             </Button>
           </Col>
@@ -169,7 +169,10 @@ const ProductDetails = () => {
                     aria-hidden="true"
                   ></i>
                 ))}
-                <span className="ms-2">({product.rating.count} reviews)</span>
+                <span className="ms-2">
+                  <i className="fas fa-users me-1 text-muted"></i>
+                  ({product.rating.count} reviews)
+                </span>
               </div>
 
               {/* Price */}
@@ -189,16 +192,25 @@ const ProductDetails = () => {
 
               {/* Description */}
               <div className="mb-4">
-                <h5>Description</h5>
+                <h5>
+                  <i className="fas fa-info-circle me-2 text-primary"></i>
+                  Description
+                </h5>
                 <p>{product.description}</p>
               </div>
 
               {/* Features */}
               <div className="mb-4">
-                <h5>Features</h5>
+                <h5>
+                  <i className="fas fa-check-circle me-2 text-success"></i>
+                  Features
+                </h5>
                 <ul>
-                  {product.features.map((feature, index) => (
-                    <li key={index}>{feature}</li>
+                  {product.features?.map((feature, index) => (
+                    <li key={index}>
+                      <i className="fas fa-check me-2 text-success"></i>
+                      {feature}
+                    </li>
                   ))}
                 </ul>
               </div>
@@ -207,12 +219,12 @@ const ProductDetails = () => {
               <div className="mb-4">
                 {product.inStock ? (
                   <div className="text-success">
-                    <i className="fas fa-check-circle me-2" aria-hidden="true"></i>
+                    <i className="fas fa-check-circle me-2"></i>
                     In Stock ({product.stockCount} available)
                   </div>
                 ) : (
                   <div className="text-danger">
-                    <i className="fas fa-times-circle me-2" aria-hidden="true"></i>
+                    <i className="fas fa-times-circle me-2"></i>
                     Out of Stock
                   </div>
                 )}
@@ -222,7 +234,10 @@ const ProductDetails = () => {
               <div className="mb-4">
                 <div className="d-flex align-items-center gap-3">
                   <div>
-                    <label htmlFor="quantity" className="form-label">Quantity:</label>
+                    <label htmlFor="quantity" className="form-label">
+                      <i className="fas fa-sort-numeric-up me-2"></i>
+                      Quantity:
+                    </label>
                     <div className="d-flex align-items-center">
                       <Button
                         variant="outline-secondary"
@@ -231,7 +246,7 @@ const ProductDetails = () => {
                         disabled={quantity <= 1}
                         aria-label="Decrease quantity"
                       >
-                        -
+                        <i className="fas fa-minus"></i>
                       </Button>
                       <span className="mx-3 fw-bold">{quantity}</span>
                       <Button
@@ -241,7 +256,7 @@ const ProductDetails = () => {
                         disabled={quantity >= product.stockCount}
                         aria-label="Increase quantity"
                       >
-                        +
+                        <i className="fas fa-plus"></i>
                       </Button>
                     </div>
                   </div>
@@ -253,7 +268,7 @@ const ProductDetails = () => {
                     disabled={!product.inStock || isInCart(product.id)}
                     aria-label={`Add ${product.name} to cart`}
                   >
-                    <i className="fas fa-shopping-cart me-2" aria-hidden="true"></i>
+                    <i className="fas fa-shopping-cart me-2"></i>
                     {isInCart(product.id) ? 'Already in Cart' : 'Add to Cart'}
                   </Button>
                 </div>
@@ -261,7 +276,7 @@ const ProductDetails = () => {
 
               {/* Additional Info */}
               <div className="small text-muted">
-                <i className="fas fa-truck me-2" aria-hidden="true"></i>
+                <i className="fas fa-truck me-2"></i>
                 Free shipping on orders over ₹500
               </div>
             </div>

@@ -1,3 +1,6 @@
+/* Import Font Awesome icons */
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
@@ -10,4 +13,132 @@ body {
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+}
+
+/* Ensure Font Awesome icons are properly loaded */
+.fas, .far, .fab, .fal, .fad {
+  font-family: "Font Awesome 6 Free", "Font Awesome 6 Pro", "Font Awesome 6 Brands" !important;
+  font-weight: 900;
+}
+
+.far {
+  font-weight: 400;
+}
+
+.fab {
+  font-weight: 400;
+  font-family: "Font Awesome 6 Brands" !important;
+}
+
+.fal {
+  font-weight: 300;
+}
+
+.fad {
+  font-weight: 900;
+}
+
+/* Icon accessibility improvements */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Icon focus states for accessibility */
+.btn:focus .fas,
+.btn:focus .far,
+.btn:focus .fab {
+  outline: 2px solid #007bff;
+  outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .fas, .far, .fab {
+    filter: contrast(1.5);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .fas, .far, .fab {
+    transition: none;
+  }
+  
+  .btn:hover .fas,
+  .btn:hover .far,
+  .btn:hover .fab {
+    transform: none;
+  }
+}
+
+/* Icon loading fallback */
+.icon-loading::before {
+  content: "⏳";
+  font-family: system-ui;
+}
+
+/* Ensure icons are never cut off */
+.btn {
+  overflow: visible;
+}
+
+/* Icon spacing in navigation */
+.navbar-nav .nav-link i {
+  margin-right: 0.5rem;
+  width: 16px;
+  text-align: center;
+}
+
+/* Dropdown menu icons */
+.dropdown-item i {
+  margin-right: 0.75rem;
+  width: 16px;
+  text-align: center;
+  color: inherit;
+}
+
+/* Form control icons */
+.form-control + .fas,
+.form-select + .fas {
+  pointer-events: none;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  right: 10px;
+  color: #6c757d;
+}
+
+/* Card header icons */
+.card-header i {
+  margin-right: 0.5rem;
+  color: #007bff;
+}
+
+/* Alert icons */
+.alert i:first-child {
+  margin-right: 0.5rem;
+}
+
+/* List item icons */
+.list-group-item i,
+.breadcrumb-item i {
+  margin-right: 0.5rem;
+}
+
+/* Badge icons */
+.badge i {
+  margin-right: 0.25rem;
+}
+
+/* Tab icons */
+.nav-tabs .nav-link i {
+  margin-right: 0.5rem;
 }

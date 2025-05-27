@@ -217,36 +217,48 @@ const Products = () => {
         {/* Filters */}
         <Row className="mb-4" role="toolbar" aria-label="Product filters">
           <Col md={3}>
-            <Form.Select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              aria-label="Filter by category"
-            >
-              {categories.map(cat => (
-                <option key={cat.value} value={cat.value}>{cat.label}</option>
-              ))}
-            </Form.Select>
+            <div className="position-relative">
+              <i className="fas fa-filter position-absolute" style={{ left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#6c757d' }}></i>
+              <Form.Select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                aria-label="Filter by category"
+                style={{ paddingLeft: '35px' }}
+              >
+                {categories.map(cat => (
+                  <option key={cat.value} value={cat.value}>{cat.label}</option>
+                ))}
+              </Form.Select>
+            </div>
           </Col>
           <Col md={3}>
-            <Form.Select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              aria-label="Sort products by"
-            >
-              <option value="name">Sort by Name</option>
-              <option value="price-low">Price: Low to High</option>
-              <option value="price-high">Price: High to Low</option>
-              <option value="rating">Sort by Rating</option>
-            </Form.Select>
+            <div className="position-relative">
+              <i className="fas fa-sort position-absolute" style={{ left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#6c757d' }}></i>
+              <Form.Select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                aria-label="Sort products by"
+                style={{ paddingLeft: '35px' }}
+              >
+                <option value="name"><i className="fas fa-sort-alpha-down"></i> Sort by Name</option>
+                <option value="price-low"><i className="fas fa-sort-numeric-down"></i> Price: Low to High</option>
+                <option value="price-high"><i className="fas fa-sort-numeric-up"></i> Price: High to Low</option>
+                <option value="rating"><i className="fas fa-star"></i> Sort by Rating</option>
+              </Form.Select>
+            </div>
           </Col>
           <Col md={6}>
-            <Form.Control
-              type="text"
-              placeholder="Search products..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              aria-label="Search for specific products"
-            />
+            <div className="position-relative">
+              <i className="fas fa-search position-absolute" style={{ left: '15px', top: '50%', transform: 'translateY(-50%)', color: '#6c757d' }}></i>
+              <Form.Control
+                type="text"
+                placeholder="Search products..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                aria-label="Search for specific products"
+                style={{ paddingLeft: '45px' }}
+              />
+            </div>
           </Col>
         </Row>
 
@@ -261,6 +273,7 @@ const Products = () => {
           ) : (
             <Col>
               <div className="text-center py-5" role="status" aria-live="polite">
+                <i className="fas fa-search fa-3x text-muted mb-3"></i>
                 <h4>No products found</h4>
                 <p className="text-muted">Try adjusting your filters or search terms</p>
               </div>

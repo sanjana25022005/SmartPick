@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Container, Row, Col, Card, Form, Button, Alert } from 'react-bootstrap';
+import { Container, Row, Col, Card, Form, Button, Alert, Spinner } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
@@ -108,6 +108,28 @@ const Checkout = () => {
   return (
     <div className="checkout-page">
       <Container className="py-4">
+        <Row className="py-4">
+          <Col>
+            <h2>
+              <i className="fas fa-credit-card me-2 text-primary"></i>
+              Checkout
+            </h2>
+            <nav aria-label="Checkout steps">
+              <ol className="breadcrumb">
+                <li className="breadcrumb-item">
+                  <i className="fas fa-shopping-cart me-1"></i>Cart
+                </li>
+                <li className="breadcrumb-item active">
+                  <i className="fas fa-credit-card me-1"></i>Checkout
+                </li>
+                <li className="breadcrumb-item text-muted">
+                  <i className="fas fa-check-circle me-1"></i>Confirmation
+                </li>
+              </ol>
+            </nav>
+          </Col>
+        </Row>
+
         {/* Progress Steps */}
         <div className="checkout-steps mb-5">
           <div className="steps-container">
@@ -136,7 +158,10 @@ const Checkout = () => {
             {currentStep === 1 && (
               <Card className="checkout-card">
                 <Card.Header>
-                  <h4><i className="fas fa-map-marker-alt me-2"></i>Shipping Address</h4>
+                  <h5 className="mb-0">
+                    <i className="fas fa-user me-2"></i>
+                    Personal Information
+                  </h5>
                 </Card.Header>
                 <Card.Body>
                   <Form>
@@ -241,11 +266,63 @@ const Checkout = () => {
             {currentStep === 2 && (
               <Card className="checkout-card">
                 <Card.Header>
-                  <h4><i className="fas fa-credit-card me-2"></i>Payment Method</h4>
+                  <h5 className="mb-0">
+                    <i className="fas fa-credit-card me-2"></i>
+                    Payment Method
+                  </h5>
                 </Card.Header>
                 <Card.Body>
                   <div className="payment-methods">
-                    {/* Payment method selection and forms */}
+                    <Form>
+                      <Form.Group className="mb-3">
+                        <Form.Label>Select Payment Method *</Form.Label>
+                        <div>
+                          <Form.Check
+                            type="radio"
+                            id="cod"
+                            name="payment"
+                            value="cod"
+                            label={
+                              <span>
+                                <i className="fas fa-money-bill-wave me-2 text-success"></i>
+                                Cash on Delivery
+                              </span>
+                            }
+                            checked={paymentMethod === 'cod'}
+                            onChange={(e) => setPaymentMethod(e.target.value)}
+                          />
+                          <Form.Check
+                            type="radio"
+                            id="card"
+                            name="payment"
+                            value="card"
+                            label={
+                              <span>
+                                <i className="fas fa-credit-card me-2 text-primary"></i>
+                                Credit/Debit Card
+                              </span>
+                            }
+                            checked={paymentMethod === 'card'}
+                            onChange={(e) => setPaymentMethod(e.target.value)}
+                          />
+                          <Form.Check
+                            type="radio"
+                            id="upi"
+                            name="payment"
+                            value="upi"
+                            label={
+                              <span>
+                                <i className="fas fa-mobile-alt me-2 text-info"></i>
+                                UPI Payment
+                              </span>
+                            }
+                            checked={paymentMethod === 'upi'}
+                            onChange={(e) => setPaymentMethod(e.target.value)}
+                          />
+                        </div>
+                      </Form.Group>
+                    </Form>
+
                     <div className="step-actions">
                       <Button 
                         variant="outline-secondary"
@@ -271,10 +348,80 @@ const Checkout = () => {
             {currentStep === 3 && (
               <Card className="checkout-card">
                 <Card.Header>
-                  <h4><i className="fas fa-check-circle me-2"></i>Review Your Order</h4>
+                  <h5 className="mb-0">
+                    <i className="fas fa-receipt me-2"></i>
+                    Order Summary
+                  </h5>
                 </Card.Header>
                 <Card.Body>
                   {/* Order review content */}
+                  <div className="order-review">
+                    {cartItems.map((item) => (
+                      <div key={item.id} className="d-flex justify-content-between align-items-center mb-2">
+                        <div className="d-flex align-items-center">
+                          <img 
+                            src={item.image} 
+                            alt={item.name}
+                            style={{ width: '40px', height: '40px', objectFit: 'cover' }}
+                            className="me-2 rounded"
+                          />
+                          <div>
+                            <small className="fw-bold">{item.name}</small>
+                            <br />
+                            <small className="text-muted">Qty: {item.quantity}</small>
+                          </div>
+                        </div>
+                        <span className="fw-bold">₹{(item.price * item.quantity).toLocaleString()}</span>
+                      </div>
+                    ))}
+                    
+                    <hr />
+                    
+                    <div className="d-flex justify-content-between mb-2">
+                      <span>
+                        <i className="fas fa-calculator me-2"></i>
+                        Subtotal:
+                      </span>
+                      <span>₹{subtotal.toLocaleString()}</span>
+                    </div>
+                    
+                    <div className="d-flex justify-content-between mb-2">
+                      <span>
+                        <i className="fas fa-truck me-2"></i>
+                        Shipping:
+                      </span>
+                      <span className={shipping === 0 ? 'text-success' : ''}>
+                        {shipping === 0 ? (
+                          <>
+                            <i className="fas fa-gift me-1"></i>
+                            FREE
+                          </>
+                        ) : `₹${shipping}`}
+                      </span>
+                    </div>
+                    
+                    <div className="d-flex justify-content-between mb-2">
+                      <span>
+                        <i className="fas fa-percentage me-2"></i>
+                        Tax (GST 18%):
+                      </span>
+                      <span>₹{tax.toLocaleString()}</span>
+                    </div>
+                    
+                    <hr />
+                    
+                    <div className="d-flex justify-content-between mb-3">
+                      <strong>Total:</strong>
+                      <strong className="text-primary">₹{total.toLocaleString()}</strong>
+                    </div>
+
+                    {subtotal < 500 && (
+                      <Alert variant="info" className="small mb-3">
+                        Add ₹{(500 - subtotal).toLocaleString()} more for free shipping!
+                      </Alert>
+                    )}
+                  </div>
+
                   <div className="step-actions">
                     <Button 
                       variant="outline-secondary"
@@ -284,12 +431,23 @@ const Checkout = () => {
                       Back
                     </Button>
                     <Button 
+                      type="submit" 
                       variant="success" 
-                      size="lg"
-                      onClick={handleSubmit}
+                      size="lg" 
+                      className="w-100 mt-3"
                       disabled={loading}
                     >
-                      {loading ? 'Placing Order...' : 'Place Order'}
+                      {loading ? (
+                        <>
+                          <Spinner size="sm" className="me-2" />
+                          Processing...
+                        </>
+                      ) : (
+                        <>
+                          <i className="fas fa-check-circle me-2"></i>
+                          Place Order
+                        </>
+                      )}
                     </Button>
                   </div>
                 </Card.Body>
@@ -327,19 +485,33 @@ const Checkout = () => {
                 <hr />
                 
                 <div className="d-flex justify-content-between mb-2">
-                  <span>Subtotal:</span>
+                  <span>
+                    <i className="fas fa-calculator me-2"></i>
+                    Subtotal:
+                  </span>
                   <span>₹{subtotal.toLocaleString()}</span>
                 </div>
                 
                 <div className="d-flex justify-content-between mb-2">
-                  <span>Shipping:</span>
+                  <span>
+                    <i className="fas fa-truck me-2"></i>
+                    Shipping:
+                  </span>
                   <span className={shipping === 0 ? 'text-success' : ''}>
-                    {shipping === 0 ? 'FREE' : `₹${shipping}`}
+                    {shipping === 0 ? (
+                      <>
+                        <i className="fas fa-gift me-1"></i>
+                        FREE
+                      </>
+                    ) : `₹${shipping}`}
                   </span>
                 </div>
                 
                 <div className="d-flex justify-content-between mb-2">
-                  <span>Tax (GST 18%):</span>
+                  <span>
+                    <i className="fas fa-percentage me-2"></i>
+                    Tax (GST 18%):
+                  </span>
                   <span>₹{tax.toLocaleString()}</span>
                 </div>
                 

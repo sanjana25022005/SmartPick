@@ -93,6 +93,9 @@ const VoiceSearch = ({ onSearch, placeholder = "Search products..." }) => {
     <div role="search" aria-label="Product search">
       <Form onSubmit={handleSubmit}>
         <InputGroup>
+          <span className="input-group-text bg-white border-end-0">
+            <i className="fas fa-search text-muted"></i>
+          </span>
           <Form.Control
             type="text"
             placeholder={placeholder}
@@ -100,23 +103,30 @@ const VoiceSearch = ({ onSearch, placeholder = "Search products..." }) => {
             onChange={(e) => setSearchTerm(e.target.value)}
             aria-label="Search for products"
             aria-describedby="search-help"
+            className="border-start-0 border-end-0"
+            style={{ borderLeft: 'none', borderRight: 'none' }}
           />
           <Button
             type="button"
             variant={isListening ? "danger" : "outline-primary"}
             onClick={isListening ? stopListening : startListening}
             disabled={!speechSupported}
-            className="voice-btn"
+            className="voice-btn border-start-0"
             aria-label={isListening ? "Stop voice search" : "Start voice search"}
             aria-pressed={isListening}
             title={speechSupported ? (isListening ? "Stop listening" : "Use voice search") : "Voice search not supported"}
           >
-            <i className={`fas ${isListening ? 'fa-stop' : 'fa-microphone'}`} aria-hidden="true"></i>
+            {isListening ? (
+              <i className="fas fa-stop text-white" aria-hidden="true"></i>
+            ) : (
+              <i className="fas fa-microphone" aria-hidden="true"></i>
+            )}
           </Button>
           <Button 
             type="submit" 
             variant="primary"
             aria-label="Search products"
+            className="border-start-0"
           >
             <i className="fas fa-search" aria-hidden="true"></i>
           </Button>
@@ -128,9 +138,20 @@ const VoiceSearch = ({ onSearch, placeholder = "Search products..." }) => {
       </div>
       
       {isListening && (
-        <Alert variant="info" className="mt-2 mb-0" role="status" aria-live="polite">
-          <i className="fas fa-microphone me-2" aria-hidden="true"></i>
-          Listening... Speak now!
+        <Alert variant="info" className="mt-2 mb-0 d-flex align-items-center" role="status" aria-live="polite">
+          <div className="me-2">
+            <i className="fas fa-microphone-alt text-primary fa-pulse" aria-hidden="true"></i>
+          </div>
+          <div>
+            <span className="fw-bold">Listening...</span> Speak clearly now!
+          </div>
+        </Alert>
+      )}
+
+      {!speechSupported && (
+        <Alert variant="warning" className="mt-2 mb-0 d-flex align-items-center">
+          <i className="fas fa-exclamation-triangle me-2" aria-hidden="true"></i>
+          Voice search is not supported in your browser. Try Chrome or Edge.
         </Alert>
       )}
     </div>

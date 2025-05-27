@@ -451,17 +451,155 @@
   justify-content: center;
   color: white;
   font-size: 2rem;
+  transition: all 0.3s ease;
 }
 
-.feature-card h5 {
-  color: #333;
-  font-weight: 600;
-  margin-bottom: 1rem;
+.feature-card:hover .feature-icon {
+  transform: scale(1.1);
+  background: linear-gradient(135deg, #0056b3, #004085);
 }
 
-.feature-card p {
-  color: #666;
-  margin-bottom: 0;
+.feature-icon .fas {
+  font-size: 2rem;
+  color: white;
+}
+
+/* Icon-specific styling for homepage */
+.product-overlay .fas {
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.product-card:hover .product-overlay .fas {
+  transform: scale(1.1);
+}
+
+/* Category icons */
+.category-overlay .fas {
+  font-size: 1.8rem;
+  color: #007bff;
+  transition: all 0.3s ease;
+}
+
+.category-card:hover .category-overlay .fas {
+  transform: scale(1.2);
+  color: #0056b3;
+}
+
+/* Feature section icons */
+.feature-icon {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 1rem;
+  background: linear-gradient(135deg, #007bff, #0056b3);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 2rem;
+  transition: all 0.3s ease;
+}
+
+.feature-card:hover .feature-icon {
+  transform: scale(1.1);
+  background: linear-gradient(135deg, #0056b3, #004085);
+}
+
+.feature-icon .fas {
+  font-size: 2rem;
+  color: white;
+}
+
+/* Hero section icons */
+.hero-btn-primary .fas {
+  margin-right: 0.5rem;
+  font-size: 1.1rem;
+}
+
+/* Product rating stars */
+.product-rating .fas.fa-star {
+  font-size: 0.9rem;
+  margin-right: 2px;
+}
+
+.product-rating .fas.fa-star.text-warning {
+  color: #ffc107 !important;
+}
+
+/* Discount badge icons */
+.discount-badge .fas {
+  font-size: 0.8rem;
+  margin-right: 0.25rem;
+}
+
+/* Wishlist button heart animation */
+.wishlist-btn .fa-heart {
+  transition: all 0.3s ease;
+}
+
+.wishlist-btn[aria-pressed="true"] .fa-heart {
+  color: #dc3545 !important;
+  animation: heartBeat 0.5s ease-in-out;
+}
+
+@keyframes heartBeat {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.3); }
+}
+
+/* Quick view button */
+.quick-view-btn .fa-eye {
+  transition: all 0.3s ease;
+}
+
+.quick-view-btn:hover .fa-eye {
+  transform: scale(1.2);
+}
+
+/* Add to cart button */
+.add-to-cart-btn .fas {
+  margin-right: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.add-to-cart-btn:hover .fas {
+  transform: scale(1.1);
+}
+
+/* Price icons */
+.current-price::before {
+  content: "₹";
+  font-weight: 700;
+}
+
+/* Brand icons */
+.product-brand::before {
+  content: "\f02d";
+  font-family: "Font Awesome 6 Free";
+  font-weight: 900;
+  margin-right: 0.25rem;
+  color: #6c757d;
+  font-size: 0.8rem;
+}
+
+/* Rating count icons */
+.rating-count::before {
+  content: "\f007";
+  font-family: "Font Awesome 6 Free";
+  font-weight: 900;
+  margin-right: 0.25rem;
+  color: #6c757d;
+  font-size: 0.7rem;
+}
+
+/* View all products button */
+.hover-scale .fas {
+  transition: all 0.3s ease;
+}
+
+.hover-scale:hover .fas {
+  transform: translateX(5px);
 }
 
 /* Responsive Design */

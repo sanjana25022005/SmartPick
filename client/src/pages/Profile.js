@@ -160,7 +160,10 @@ const Profile = () => {
         <Row className="py-4">
           <Col>
             <div className="d-flex justify-content-between align-items-center mb-4">
-              <h2>My Profile</h2>
+              <h2>
+                <i className="fas fa-user-circle me-2 text-primary"></i>
+                My Profile
+              </h2>
               {user?.isAdmin && (
                 <Badge bg="primary" className="fs-6">
                   <i className="fas fa-crown me-1"></i>
@@ -180,7 +183,10 @@ const Profile = () => {
               <Tab eventKey="profile" title={<><i className="fas fa-user me-2"></i>Profile</>}>
                 <Card className="shadow-sm">
                   <Card.Header>
-                    <h5 className="mb-0">Personal Information</h5>
+                    <h5 className="mb-0">
+                      <i className="fas fa-id-card me-2"></i>
+                      Personal Information
+                    </h5>
                   </Card.Header>
                   <Card.Body>
                     <Form onSubmit={handleProfileSubmit}>
@@ -311,8 +317,17 @@ const Profile = () => {
                       </Row>
 
                       <Button type="submit" variant="primary" disabled={loading}>
-                        {loading ? <Spinner size="sm" className="me-2" /> : null}
-                        Update Profile
+                        {loading ? (
+                          <>
+                            <Spinner size="sm" className="me-2" />
+                            Updating...
+                          </>
+                        ) : (
+                          <>
+                            <i className="fas fa-save me-2"></i>
+                            Update Profile
+                          </>
+                        )}
                       </Button>
                     </Form>
                   </Card.Body>
@@ -323,7 +338,10 @@ const Profile = () => {
               <Tab eventKey="security" title={<><i className="fas fa-lock me-2"></i>Security</>}>
                 <Card className="shadow-sm">
                   <Card.Header>
-                    <h5 className="mb-0">Change Password</h5>
+                    <h5 className="mb-0">
+                      <i className="fas fa-key me-2"></i>
+                      Change Password
+                    </h5>
                   </Card.Header>
                   <Card.Body>
                     <Form onSubmit={handlePasswordSubmit}>
@@ -362,8 +380,17 @@ const Profile = () => {
                       </Form.Group>
 
                       <Button type="submit" variant="primary" disabled={loading}>
-                        {loading ? <Spinner size="sm" className="me-2" /> : null}
-                        Update Password
+                        {loading ? (
+                          <>
+                            <Spinner size="sm" className="me-2" />
+                            Updating...
+                          </>
+                        ) : (
+                          <>
+                            <i className="fas fa-shield-alt me-2"></i>
+                            Update Password
+                          </>
+                        )}
                       </Button>
                     </Form>
                   </Card.Body>
@@ -374,7 +401,10 @@ const Profile = () => {
               <Tab eventKey="orders" title={<><i className="fas fa-box me-2"></i>Orders ({orders.length})</>}>
                 <Card className="shadow-sm">
                   <Card.Header>
-                    <h5 className="mb-0">Order History</h5>
+                    <h5 className="mb-0">
+                      <i className="fas fa-history me-2"></i>
+                      Order History
+                    </h5>
                   </Card.Header>
                   <Card.Body>
                     {orders.length > 0 ? (
@@ -422,6 +452,7 @@ const Profile = () => {
                         <h5>No orders yet</h5>
                         <p className="text-muted">You haven't placed any orders yet.</p>
                         <Button variant="primary" onClick={() => navigate('/products')}>
+                          <i className="fas fa-shopping-bag me-2"></i>
                           Start Shopping
                         </Button>
                       </div>
@@ -434,7 +465,10 @@ const Profile = () => {
               <Tab eventKey="preferences" title={<><i className="fas fa-cog me-2"></i>Preferences</>}>
                 <Card className="shadow-sm">
                   <Card.Header>
-                    <h5 className="mb-0">Notification Preferences</h5>
+                    <h5 className="mb-0">
+                      <i className="fas fa-bell me-2"></i>
+                      Notification Preferences
+                    </h5>
                   </Card.Header>
                   <Card.Body>
                     <Form onSubmit={handlePreferencesSubmit}>
@@ -491,8 +525,17 @@ const Profile = () => {
                       </Form.Group>
 
                       <Button type="submit" variant="primary" disabled={loading}>
-                        {loading ? <Spinner size="sm" className="me-2" /> : null}
-                        Save Preferences
+                        {loading ? (
+                          <>
+                            <Spinner size="sm" className="me-2" />
+                            Saving...
+                          </>
+                        ) : (
+                          <>
+                            <i className="fas fa-check me-2"></i>
+                            Save Preferences
+                          </>
+                        )}
                       </Button>
                     </Form>
                   </Card.Body>

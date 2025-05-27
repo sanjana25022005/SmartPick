@@ -61,6 +61,7 @@ const Navigation = () => {
               role="menuitem"
               aria-label="Go to homepage"
             >
+              <i className="fas fa-home me-2"></i>
               Home
             </Nav.Link>
             <Nav.Link 
@@ -70,6 +71,7 @@ const Navigation = () => {
               role="menuitem"
               aria-label="Browse all products"
             >
+              <i className="fas fa-boxes me-2"></i>
               Products
             </Nav.Link>
             <Nav.Link 
@@ -79,6 +81,7 @@ const Navigation = () => {
               role="menuitem"
               aria-label="Read our blog articles"
             >
+              <i className="fas fa-blog me-2"></i>
               Blog
             </Nav.Link>
             {isAuthenticated && (
@@ -89,12 +92,18 @@ const Navigation = () => {
                 role="menuitem"
                 aria-label="View your order history"
               >
+                <i className="fas fa-clipboard-list me-2"></i>
                 My Orders
               </Nav.Link>
             )}
             {user?.isAdmin && (
               <NavDropdown 
-                title="Admin" 
+                title={
+                  <span>
+                    <i className="fas fa-crown me-1"></i>
+                    Admin
+                  </span>
+                } 
                 id="admin-nav-dropdown"
                 role="menu"
                 aria-label="Admin menu"
@@ -105,7 +114,7 @@ const Navigation = () => {
                   role="menuitem"
                   aria-label="Go to admin dashboard"
                 >
-                  Dashboard
+                  <i className="fas fa-tachometer-alt me-2"></i>Dashboard
                 </NavDropdown.Item>
                 <NavDropdown.Item 
                   as={Link} 
@@ -113,7 +122,7 @@ const Navigation = () => {
                   role="menuitem"
                   aria-label="Manage products"
                 >
-                  Products
+                  <i className="fas fa-box me-2"></i>Products
                 </NavDropdown.Item>
                 <NavDropdown.Item 
                   as={Link} 
@@ -121,7 +130,7 @@ const Navigation = () => {
                   role="menuitem"
                   aria-label="Manage orders"
                 >
-                  Orders
+                  <i className="fas fa-shopping-bag me-2"></i>Orders
                 </NavDropdown.Item>
                 <NavDropdown.Item 
                   as={Link} 
@@ -129,7 +138,7 @@ const Navigation = () => {
                   role="menuitem"
                   aria-label="Manage users"
                 >
-                  Users
+                  <i className="fas fa-users me-2"></i>Users
                 </NavDropdown.Item>
               </NavDropdown>
             )}
@@ -162,8 +171,9 @@ const Navigation = () => {
                 className="position-relative me-3 wishlist-link"
                 aria-label={`Wishlist with ${wishlistCount} items`}
                 role="button"
+                title="My Wishlist"
               >
-                <i className="fas fa-heart" aria-hidden="true"></i>
+                <i className="fas fa-heart fs-5" aria-hidden="true"></i>
                 {wishlistCount > 0 && (
                   <Badge 
                     bg="danger" 
@@ -184,11 +194,12 @@ const Navigation = () => {
               className="position-relative me-3 cart-link"
               aria-label={`Shopping cart with ${cartCount} items`}
               role="button"
+              title="Shopping Cart"
             >
-              <i className="fas fa-shopping-cart" aria-hidden="true"></i>
+              <i className="fas fa-shopping-cart fs-5" aria-hidden="true"></i>
               {cartCount > 0 && (
                 <Badge 
-                  bg="danger" 
+                  bg="primary" 
                   pill 
                   className="position-absolute top-0 start-100 translate-middle cart-badge"
                   aria-label={`${cartCount} items in cart`}
@@ -254,6 +265,7 @@ const Navigation = () => {
                   size="sm"
                   aria-label="Sign in to your account"
                 >
+                  <i className="fas fa-sign-in-alt me-2"></i>
                   Login
                 </Button>
                 <Button 
@@ -263,6 +275,7 @@ const Navigation = () => {
                   size="sm"
                   aria-label="Create a new account"
                 >
+                  <i className="fas fa-user-plus me-2"></i>
                   Register
                 </Button>
               </div>

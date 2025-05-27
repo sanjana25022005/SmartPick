@@ -58,11 +58,12 @@ const Cart = () => {
       <Container className="py-4">
         <Row>
           <Col>
-            <div className="page-header">
-              <h1>Shopping Cart</h1>
-              <p className="text-muted">
-                {cartCount} item{cartCount !== 1 ? 's' : ''} in your cart
-              </p>
+            <div className="d-flex justify-content-between align-items-center mb-4">
+              <h2>
+                <i className="fas fa-shopping-cart me-2 text-primary"></i>
+                Shopping Cart
+              </h2>
+              <span className="text-muted">({cartCount} items)</span>
             </div>
           </Col>
         </Row>
@@ -134,24 +135,20 @@ const Cart = () => {
                             <Button
                               variant="outline-secondary"
                               size="sm"
-                              onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
+                              onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
                               disabled={item.quantity <= 1}
+                              aria-label="Decrease quantity"
                             >
-                              -
+                              <i className="fas fa-minus"></i>
                             </Button>
-                            <Form.Control
-                              type="number"
-                              value={item.quantity}
-                              onChange={(e) => handleQuantityChange(item.id, parseInt(e.target.value))}
-                              className="quantity-input"
-                              min="1"
-                            />
+                            <span className="mx-3 fw-bold">{item.quantity}</span>
                             <Button
                               variant="outline-secondary"
                               size="sm"
-                              onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
+                              onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                              aria-label="Increase quantity"
                             >
-                              +
+                              <i className="fas fa-plus"></i>
                             </Button>
                           </div>
                         </Col>
@@ -167,7 +164,8 @@ const Cart = () => {
                             variant="outline-danger"
                             size="sm"
                             onClick={() => removeFromCart(item.id)}
-                            className="remove-btn"
+                            aria-label={`Remove ${item.name} from cart`}
+                            title="Remove from cart"
                           >
                             <i className="fas fa-trash"></i>
                           </Button>
@@ -225,6 +223,7 @@ const Cart = () => {
                   onClick={() => navigate('/checkout')}
                   disabled={cartItems.length === 0}
                 >
+                  <i className="fas fa-credit-card me-2"></i>
                   Proceed to Checkout
                   <i className="fas fa-arrow-right ms-2"></i>
                 </Button>
@@ -234,6 +233,7 @@ const Cart = () => {
                   className="w-100 mt-2"
                   onClick={() => navigate('/products')}
                 >
+                  <i className="fas fa-arrow-left me-2"></i>
                   Continue Shopping
                 </Button>
               </Card.Body>
