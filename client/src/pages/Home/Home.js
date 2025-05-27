@@ -97,94 +97,108 @@ const HomePage = () => {
 
   // Render individual product
   const ProductCard = ({ product }) => (
-    <Col key={product.id} lg={3} md={6} className="mb-4">
-      <Card className="product-card h-100">
-        <div className="product-image-container">
-          <Card.Img 
-            variant="top" 
-            src={product.image} 
-            alt={product.name}
-            className="product-image"
+    <Card className="product-card h-100 hover-lift" role="article" aria-labelledby={`product-title-${product.id}`}>
+      <div className="product-image-container">
+        <Card.Img 
+          variant="top" 
+          src={product.image} 
+          alt={`${product.name} by ${product.brand} - Premium stationery product`}
+          className="product-image"
+          onClick={() => navigate(`/products/${product.id}`)}
+          style={{ cursor: 'pointer' }}
+          tabIndex="0"
+          role="button"
+          aria-label={`View details for ${product.name}`}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              navigate(`/products/${product.id}`);
+            }
+          }}
+        />
+        <div className="product-overlay">
+          <Button
+            variant="outline-light"
+            size="sm"
+            className="wishlist-btn button-bounce"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              toggleWishlist(product);
+            }}
+            aria-label={checkWishlist(product.id) ? `Remove ${product.name} from wishlist` : `Add ${product.name} to wishlist`}
+            aria-pressed={checkWishlist(product.id)}
+          >
+            <i className={`fas fa-heart ${checkWishlist(product.id) ? 'text-danger' : ''}`} aria-hidden="true"></i>
+          </Button>
+          <Button
+            variant="outline-light"
+            size="sm"
+            className="quick-view-btn button-bounce"
             onClick={() => navigate(`/products/${product.id}`)}
-            style={{ cursor: 'pointer' }}
-          />
-          <div className="product-overlay">
-            <Button
-              variant="outline-light"
-              size="sm"
-              className="wishlist-btn"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                toggleWishlist(product);
-              }}
-            >
-              <i className={`fas fa-heart ${checkWishlist(product.id) ? 'text-danger' : ''}`}></i>
-            </Button>
-            <Button
-              variant="outline-light"
-              size="sm"
-              className="quick-view-btn"
-              onClick={() => navigate(`/products/${product.id}`)}
-            >
-              <i className="fas fa-eye"></i>
-            </Button>
-          </div>
-          {product.originalPrice > product.price && (
-            <Badge bg="danger" className="discount-badge">
-              {Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}% OFF
-            </Badge>
-          )}
+            aria-label={`Quick view for ${product.name}`}
+          >
+            <i className="fas fa-eye" aria-hidden="true"></i>
+          </Button>
         </div>
-        
-        <Card.Body className="d-flex flex-column">
-          <div className="product-info flex-grow-1">
-            <h6 className="product-title">{product.name}</h6>
-            <p className="product-brand text-muted">{product.brand}</p>
-            
-            <div className="product-rating mb-2">
-              {[...Array(5)].map((_, i) => (
-                <i 
-                  key={i} 
-                  className={`fas fa-star ${i < Math.floor(product.rating.average) ? 'text-warning' : 'text-muted'}`}
-                ></i>
-              ))}
-              <span className="rating-count ms-2">({product.rating.count})</span>
-            </div>
-            
-            <div className="product-price">
-              <span className="current-price">₹{product.price}</span>
-              {product.originalPrice > product.price && (
-                <span className="original-price ms-2">₹{product.originalPrice}</span>
-              )}
-            </div>
+        {product.originalPrice > product.price && (
+          <Badge bg="danger" className="discount-badge" role="text" aria-label={`${Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)} percent discount`}>
+            {Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}% OFF
+          </Badge>
+        )}
+      </div>
+      
+      <Card.Body className="d-flex flex-column">
+        <div className="product-info flex-grow-1">
+          <h6 className="product-title" id={`product-title-${product.id}`}>{product.name}</h6>
+          <p className="product-brand text-muted">{product.brand}</p>
+          
+          <div className="product-rating mb-2" role="img" aria-label={`Rating: ${product.rating.average} out of 5 stars, based on ${product.rating.count} reviews`}>
+            {[...Array(5)].map((_, i) => (
+              <i 
+                key={i} 
+                className={`fas fa-star ${i < Math.floor(product.rating.average) ? 'text-warning' : 'text-muted'}`}
+                aria-hidden="true"
+              ></i>
+            ))}
+            <span className="rating-count ms-2" aria-label={`${product.rating.count} customer reviews`}>
+              ({product.rating.count})
+            </span>
           </div>
           
-          <Button 
-            variant="primary" 
-            className="add-to-cart-btn w-100 mt-3"
-            onClick={() => addToCart(product)}
-          >
-            <i className="fas fa-shopping-cart me-2"></i>
-            Add to Cart
-          </Button>
-        </Card.Body>
-      </Card>
-    </Col>
+          <div className="product-price">
+            <span className="current-price" aria-label={`Current price: ${product.price} rupees`}>₹{product.price}</span>
+            {product.originalPrice > product.price && (
+              <span className="original-price ms-2" aria-label={`Original price: ${product.originalPrice} rupees`}>₹{product.originalPrice}</span>
+            )}
+          </div>
+        </div>
+        
+        <Button 
+          variant="primary" 
+          className="add-to-cart-btn w-100 mt-3 button-bounce"
+          onClick={() => addToCart(product)}
+          aria-label={`Add ${product.name} to shopping cart`}
+        >
+          <i className="fas fa-shopping-cart me-2" aria-hidden="true"></i>
+          Add to Cart
+        </Button>
+      </Card.Body>
+    </Card>
   );
 
   return (
     <div className="home-page">
       {/* Hero Section */}
-      <section className="hero-section">
-        <Carousel fade className="hero-carousel">
+      <section className="hero-section" role="banner" aria-labelledby="hero-title">
+        <Carousel fade className="hero-carousel" aria-label="Featured promotions">
           <Carousel.Item>
             <div className="hero-slide hero-slide-1">
               <Container>
                 <Row className="align-items-center min-vh-100">
                   <Col lg={6}>
                     <div className="hero-content">
-                      <h1 className="hero-title">
+                      <h1 className="hero-title" id="hero-title">
                         Smart Stationery for 
                         <span className="highlight"> Smart Students</span>
                       </h1>
@@ -197,9 +211,10 @@ const HomePage = () => {
                           to="/products" 
                           variant="primary" 
                           size="lg" 
-                          className="hero-btn-primary"
+                          className="hero-btn-primary button-bounce"
+                          aria-label="Shop all products"
                         >
-                          <i className="fas fa-shopping-bag me-2"></i>
+                          <i className="fas fa-shopping-bag me-2" aria-hidden="true"></i>
                           Shop Now
                         </Button>
                       </div>
@@ -213,24 +228,42 @@ const HomePage = () => {
       </section>
 
       {/* Categories Section */}
-      <section className="categories-section py-5">
+      <section className="categories-section py-5" role="region" aria-labelledby="categories-title">
         <Container>
           <Row>
             <Col>
               <div className="section-header text-center mb-5">
-                <h2 className="section-title">Shop by Category</h2>
+                <h2 className="section-title" id="categories-title">Shop by Category</h2>
                 <p className="section-subtitle">Find exactly what you're looking for</p>
               </div>
             </Col>
           </Row>
           
-          <Row>
+          <Row role="list" aria-label="Product categories">
             {categories.map((cat) => (
-              <Col key={cat.id} lg={3} md={6} className="mb-4">
-                <Card as={Link} to={cat.link} className="category-card h-100 text-decoration-none">
+              <Col key={cat.id} lg={3} md={6} className="mb-4" role="listitem">
+                <Card 
+                  as={Link} 
+                  to={cat.link} 
+                  className="category-card h-100 text-decoration-none hover-lift"
+                  role="link"
+                  aria-label={`Browse ${cat.name} products`}
+                  tabIndex="0"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      navigate(cat.link);
+                    }
+                  }}
+                >
                   <div className="category-image-container">
-                    <Card.Img variant="top" src={cat.image} alt={cat.name} className="category-image" />
-                    <div className="category-overlay">
+                    <Card.Img 
+                      variant="top" 
+                      src={cat.image} 
+                      alt={`${cat.name} category featuring quality stationery products`}
+                      className="category-image" 
+                    />
+                    <div className="category-overlay" aria-hidden="true">
                       <i className={cat.icon}></i>
                     </div>
                   </div>
@@ -245,26 +278,37 @@ const HomePage = () => {
       </section>
 
       {/* Featured Products Section */}
-      <section className="featured-products-section py-5 bg-light">
+      <section className="featured-products-section py-5 bg-light" role="region" aria-labelledby="featured-title">
         <Container>
           <Row>
             <Col>
               <div className="section-header text-center mb-5">
-                <h2 className="section-title">Featured Products</h2>
+                <h2 className="section-title" id="featured-title">Featured Products</h2>
                 <p className="section-subtitle">Discover our top-rated stationery items</p>
               </div>
             </Col>
           </Row>
           
           <Row>
-            {products.map(product => <ProductCard key={product.id} product={product} />)}
+            {products.map(product => (
+              <Col key={product.id} lg={3} md={6} sm={6} xs={12} className="mb-4">
+                <ProductCard product={product} />
+              </Col>
+            ))}
           </Row>
           
           <Row>
             <Col className="text-center mt-4">
-              <Button as={Link} to="/products" variant="outline-primary" size="lg">
+              <Button 
+                as={Link} 
+                to="/products" 
+                variant="outline-primary" 
+                size="lg" 
+                className="hover-scale"
+                aria-label="View all available products"
+              >
                 View All Products
-                <i className="fas fa-arrow-right ms-2"></i>
+                <i className="fas fa-arrow-right ms-2" aria-hidden="true"></i>
               </Button>
             </Col>
           </Row>
@@ -272,13 +316,14 @@ const HomePage = () => {
       </section>
 
       {/* Features Section */}
-      <section className="features-section py-5">
+      <section className="features-section py-5" role="region" aria-labelledby="features-title">
         <Container>
-          <Row>
+          <h2 className="visually-hidden" id="features-title">Our Service Features</h2>
+          <Row role="list" aria-label="Service features">
             {features.map((feature, index) => (
-              <Col key={index} lg={3} md={6} className="mb-4">
-                <div className="feature-card text-center">
-                  <div className="feature-icon">
+              <Col key={index} lg={3} md={6} className="mb-4" role="listitem">
+                <div className="feature-card text-center neu-card" role="article">
+                  <div className="feature-icon" aria-hidden="true">
                     <i className={feature.icon}></i>
                   </div>
                   <h5>{feature.title}</h5>

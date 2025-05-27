@@ -11,24 +11,31 @@ export const useTheme = () => {
 };
 
 export const ThemeProvider = ({ children }) => {
-  const [theme, setTheme] = useState(() => {
-    const savedTheme = localStorage.getItem('smartpick_theme');
-    return savedTheme || 'light';
-  });
+  const [darkMode, setDarkMode] = useState(false);
 
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('smartpick_theme', theme);
-  }, [theme]);
+    const savedTheme = localStorage.getItem('smartpick_theme');
+    if (savedTheme) {
+      setDarkMode(savedTheme === 'dark');
+    } else {
+      // Check system preference
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      setDarkMode(prefersDark);
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('smartpick_theme', darkMode ? 'dark' : 'light');
+    document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
+  }, [darkMode]);
 
   const toggleTheme = () => {
-    setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
+    setDarkMode(prev => !prev);
   };
 
   const value = {
-    theme,
-    toggleTheme,
-    isDark: theme === 'dark'
+    darkMode,
+    toggleTheme
   };
 
   return (

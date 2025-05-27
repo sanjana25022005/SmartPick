@@ -118,58 +118,69 @@ const Products = () => {
   }, [selectedCategory, searchTerm, sortBy, products]);
 
   const ProductCard = ({ product }) => (
-    <Col key={product.id} lg={4} md={6} className="mb-4">
-      <Card className="h-100 product-card">
-        <div className="position-relative">
-          <Card.Img
-            variant="top"
-            src={product.image}
-            alt={product.name}
-            style={{ height: '250px', objectFit: 'cover', cursor: 'pointer' }}
-            onClick={() => navigate(`/products/${product.id}`)}
-          />
-          {product.originalPrice > product.price && (
-            <Badge bg="danger" className="position-absolute top-0 start-0 m-2">
-              {Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}% OFF
-            </Badge>
-          )}
-        </div>
-        
-        <Card.Body className="d-flex flex-column">
-          <div className="flex-grow-1">
-            <h6 className="card-title">{product.name}</h6>
-            <p className="text-muted small">{product.brand}</p>
-            
-            <div className="mb-2">
-              {[...Array(5)].map((_, i) => (
-                <i
-                  key={i}
-                  className={`fas fa-star ${i < Math.floor(product.rating.average) ? 'text-warning' : 'text-muted'}`}
-                  style={{ fontSize: '0.8rem' }}
-                ></i>
-              ))}
-              <span className="text-muted small ms-2">({product.rating.count})</span>
-            </div>
-            
-            <div className="mb-3">
-              <span className="h5 text-primary">₹{product.price}</span>
-              {product.originalPrice > product.price && (
-                <span className="text-muted text-decoration-line-through ms-2">₹{product.originalPrice}</span>
-              )}
-            </div>
+    <Card className="h-100 product-card" role="article" aria-labelledby={`product-${product.id}-title`}>
+      <div className="position-relative">
+        <Card.Img
+          variant="top"
+          src={product.image}
+          alt={`${product.name} by ${product.brand} - High quality stationery product`}
+          style={{ height: '250px', objectFit: 'cover', cursor: 'pointer' }}
+          onClick={() => navigate(`/products/${product.id}`)}
+          tabIndex="0"
+          role="button"
+          aria-label={`View details for ${product.name}`}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              navigate(`/products/${product.id}`);
+            }
+          }}
+        />
+        {product.originalPrice > product.price && (
+          <Badge bg="danger" className="position-absolute top-0 start-0 m-2" role="text" aria-label={`${Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)} percent discount`}>
+            {Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}% OFF
+          </Badge>
+        )}
+      </div>
+      
+      <Card.Body className="d-flex flex-column">
+        <div className="flex-grow-1">
+          <h6 className="card-title" id={`product-${product.id}-title`}>{product.name}</h6>
+          <p className="text-muted small">{product.brand}</p>
+          
+          <div className="mb-2" role="img" aria-label={`Rating: ${product.rating.average} out of 5 stars, based on ${product.rating.count} reviews`}>
+            {[...Array(5)].map((_, i) => (
+              <i
+                key={i}
+                className={`fas fa-star ${i < Math.floor(product.rating.average) ? 'text-warning' : 'text-muted'}`}
+                style={{ fontSize: '0.8rem' }}
+                aria-hidden="true"
+              ></i>
+            ))}
+            <span className="text-muted small ms-2" aria-label={`${product.rating.count} customer reviews`}>
+              ({product.rating.count})
+            </span>
           </div>
           
-          <Button
-            variant="primary"
-            className="w-100"
-            onClick={() => addToCart(product)}
-          >
-            <i className="fas fa-shopping-cart me-2"></i>
-            Add to Cart
-          </Button>
-        </Card.Body>
-      </Card>
-    </Col>
+          <div className="mb-3">
+            <span className="h5 text-primary" aria-label={`Current price: ${product.price} rupees`}>₹{product.price}</span>
+            {product.originalPrice > product.price && (
+              <span className="text-muted text-decoration-line-through ms-2" aria-label={`Original price: ${product.originalPrice} rupees`}>₹{product.originalPrice}</span>
+            )}
+          </div>
+        </div>
+        
+        <Button
+          variant="primary"
+          className="w-100"
+          onClick={() => addToCart(product)}
+          aria-label={`Add ${product.name} to shopping cart`}
+        >
+          <i className="fas fa-shopping-cart me-2" aria-hidden="true"></i>
+          Add to Cart
+        </Button>
+      </Card.Body>
+    </Card>
   );
 
   return (
@@ -183,11 +194,12 @@ const Products = () => {
         </Row>
 
         {/* Filters */}
-        <Row className="mb-4">
+        <Row className="mb-4" role="toolbar" aria-label="Product filters">
           <Col md={3}>
             <Form.Select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
+              aria-label="Filter by category"
             >
               {categories.map(cat => (
                 <option key={cat.value} value={cat.value}>{cat.label}</option>
@@ -198,6 +210,7 @@ const Products = () => {
             <Form.Select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
+              aria-label="Sort products by"
             >
               <option value="name">Sort by Name</option>
               <option value="price-low">Price: Low to High</option>
@@ -211,6 +224,7 @@ const Products = () => {
               placeholder="Search products..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              aria-label="Search for specific products"
             />
           </Col>
         </Row>
@@ -219,11 +233,13 @@ const Products = () => {
         <Row>
           {filteredProducts.length > 0 ? (
             filteredProducts.map(product => (
-              <ProductCard key={product.id} product={product} />
+              <Col key={product.id} lg={4} md={6} sm={6} xs={12} className="mb-4">
+                <ProductCard product={product} />
+              </Col>
             ))
           ) : (
             <Col>
-              <div className="text-center py-5">
+              <div className="text-center py-5" role="status" aria-live="polite">
                 <h4>No products found</h4>
                 <p className="text-muted">Try adjusting your filters or search terms</p>
               </div>
@@ -235,12 +251,12 @@ const Products = () => {
         {filteredProducts.length > 0 && (
           <Row className="mt-4">
             <Col className="d-flex justify-content-center">
-              <Pagination>
-                <Pagination.Prev disabled />
-                <Pagination.Item active>1</Pagination.Item>
-                <Pagination.Item>2</Pagination.Item>
-                <Pagination.Item>3</Pagination.Item>
-                <Pagination.Next />
+              <Pagination role="navigation" aria-label="Product pages navigation">
+                <Pagination.Prev disabled aria-label="Previous page" />
+                <Pagination.Item active aria-label="Current page, page 1">1</Pagination.Item>
+                <Pagination.Item aria-label="Go to page 2">2</Pagination.Item>
+                <Pagination.Item aria-label="Go to page 3">3</Pagination.Item>
+                <Pagination.Next aria-label="Next page" />
               </Pagination>
             </Col>
           </Row>

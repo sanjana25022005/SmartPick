@@ -188,6 +188,7 @@
   overflow: hidden;
   transition: all 0.3s ease;
   box-shadow: var(--shadow-sm);
+  height: 100%;
 }
 
 .product-card:hover {
@@ -197,19 +198,18 @@
 
 .product-image-container {
   position: relative;
-  height: 250px;
   overflow: hidden;
 }
 
 .product-image {
   width: 100%;
-  height: 100%;
+  height: 250px;
   object-fit: cover;
   transition: transform 0.3s ease;
 }
 
 .product-card:hover .product-image {
-  transform: scale(1.1);
+  transform: scale(1.05);
 }
 
 .product-overlay {
@@ -370,6 +370,63 @@
   color: var(--text-secondary);
   line-height: 1.6;
   margin: 0;
+}
+
+/* Product Grid Layout */
+.product-card {
+  height: 100%;
+  transition: all 0.3s ease;
+}
+
+.product-image-container {
+  position: relative;
+  overflow: hidden;
+}
+
+.product-image {
+  width: 100%;
+  height: 250px;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.product-card:hover .product-image {
+  transform: scale(1.05);
+}
+
+/* Ensure equal height cards */
+.row > [class*="col-"] {
+  display: flex;
+  flex-direction: column;
+}
+
+.row > [class*="col-"] > .product-card {
+  flex: 1;
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+  .product-image {
+    height: 200px;
+  }
+}
+
+@media (min-width: 577px) and (max-width: 768px) {
+  .product-image {
+    height: 220px;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 992px) {
+  .product-image {
+    height: 230px;
+  }
+}
+
+@media (min-width: 993px) {
+  .product-image {
+    height: 250px;
+  }
 }
 
 /* Responsive Design */

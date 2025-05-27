@@ -4,11 +4,15 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useCart } from '../../contexts/CartContext';
 import { useWishlist } from '../../contexts/WishlistContext';
+import { useTheme } from '../../contexts/ThemeContext';
+import ThemeToggle from '../UI/ThemeToggle';
+import VoiceSearch from '../Common/VoiceSearch';
 
-const CustomNavbar = () => {
-  const { user, isAuthenticated, logout } = useAuth();
-  const { cartCount = 0 } = useCart() || { cartCount: 0 };
-  const { wishlistCount } = useWishlist();
+const Navigation = () => {
+  const { user, logout, isAuthenticated } = useAuth();
+  const { cartCount } = useCart();
+  const { darkMode, toggleTheme } = useTheme();
+  const [expanded, setExpanded] = useState(false);
   const navigate = useNavigate();
   
   const [searchTerm, setSearchTerm] = useState('');
@@ -32,127 +36,211 @@ const CustomNavbar = () => {
   };
 
   return (
-    <Navbar bg="white" expand="lg" fixed="top" className="custom-navbar">
+    <Navbar 
+      bg={darkMode ? "dark" : "light"} 
+      variant={darkMode ? "dark" : "light"} 
+      expand="lg" 
+      fixed="top" 
+      className="shadow-sm navbar-custom"
+      role="navigation"
+      aria-label="Main navigation"
+    >
       <Container>
-        {/* Brand */}
-        <Navbar.Brand as={Link} to="/" className="brand">
-          <div className="brand-content">
-            <i className="fas fa-graduation-cap brand-icon"></i>
-            <span className="brand-text">SmartPick</span>
-          </div>
+        <Navbar.Brand 
+          as={Link} 
+          to="/" 
+          className="fw-bold brand-logo"
+          aria-label="SmartPick - Go to homepage"
+        >
+          <i className="fas fa-graduation-cap me-2" aria-hidden="true"></i>
+          SmartPick
         </Navbar.Brand>
 
-        <Navbar.Toggle aria-controls="basic-navbar-nav" />
+        <Navbar.Toggle 
+          aria-controls="basic-navbar-nav" 
+          onClick={() => setExpanded(!expanded)}
+          aria-label="Toggle navigation menu"
+        />
         
-        <Navbar.Collapse id="basic-navbar-nav">
-          {/* Main Navigation */}
-          <Nav className="me-auto">
-            <Nav.Link as={Link} to="/">Home</Nav.Link>
-            <Nav.Link as={Link} to="/products">Products</Nav.Link>
-            <Nav.Link as={Link} to="/blog">Blog</Nav.Link>
+        <Navbar.Collapse id="basic-navbar-nav" in={expanded}>
+          <Nav className="me-auto" role="menubar">
+            <Nav.Link 
+              as={Link} 
+              to="/" 
+              onClick={() => setExpanded(false)}
+              role="menuitem"
+              aria-label="Go to homepage"
+            >
+              Home
+            </Nav.Link>
+            <Nav.Link 
+              as={Link} 
+              to="/products" 
+              onClick={() => setExpanded(false)}
+              role="menuitem"
+              aria-label="Browse all products"
+            >
+              Products
+            </Nav.Link>
+            <Nav.Link 
+              as={Link} 
+              to="/blog" 
+              onClick={() => setExpanded(false)}
+              role="menuitem"
+              aria-label="Read our blog articles"
+            >
+              Blog
+            </Nav.Link>
             {isAuthenticated && (
-              <Nav.Link as={Link} to="/orders">My Orders</Nav.Link>
+              <Nav.Link 
+                as={Link} 
+                to="/orders" 
+                onClick={() => setExpanded(false)}
+                role="menuitem"
+                aria-label="View your order history"
+              >
+                My Orders
+              </Nav.Link>
             )}
             {user?.isAdmin && (
-              <NavDropdown title="Admin" id="admin-nav-dropdown">
-                <NavDropdown.Item as={Link} to="/admin/dashboard">Dashboard</NavDropdown.Item>
-                <NavDropdown.Item as={Link} to="/admin/products">Products</NavDropdown.Item>
-                <NavDropdown.Item as={Link} to="/admin/orders">Orders</NavDropdown.Item>
-                <NavDropdown.Item as={Link} to="/admin/users">Users</NavDropdown.Item>
+              <NavDropdown 
+                title="Admin" 
+                id="admin-nav-dropdown"
+                role="menu"
+                aria-label="Admin menu"
+              >
+                <NavDropdown.Item 
+                  as={Link} 
+                  to="/admin/dashboard"
+                  role="menuitem"
+                  aria-label="Go to admin dashboard"
+                >
+                  Dashboard
+                </NavDropdown.Item>
+                <NavDropdown.Item 
+                  as={Link} 
+                  to="/admin/products"
+                  role="menuitem"
+                  aria-label="Manage products"
+                >
+                  Products
+                </NavDropdown.Item>
+                <NavDropdown.Item 
+                  as={Link} 
+                  to="/admin/orders"
+                  role="menuitem"
+                  aria-label="Manage orders"
+                >
+                  Orders
+                </NavDropdown.Item>
+                <NavDropdown.Item 
+                  as={Link} 
+                  to="/admin/users"
+                  role="menuitem"
+                  aria-label="Manage users"
+                >
+                  Users
+                </NavDropdown.Item>
               </NavDropdown>
             )}
           </Nav>
 
-          {/* Right Side Navigation */}
-          <Nav className="ms-auto align-items-center">
-            {/* Search Bar */}
-            <Form className="d-flex search-form me-3">
-              <Form.Control
-                type="search"
-                placeholder="Search products..."
-                className="search-input"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                onKeyPress={handleSearchKeyPress}
-              />
-              <Button variant="outline-primary" className="search-btn" onClick={handleSearch}>
-                <i className="fas fa-search"></i>
-              </Button>
-            </Form>
+          {/* Voice Search */}
+          <div className="me-3 d-none d-md-block" style={{ width: '300px' }}>
+            <VoiceSearch />
+          </div>
 
-            {/* Wishlist Icon */}
-            <Nav.Link as={Link} to="/wishlist" className="nav-link icon-link">
-              <div className="icon-wrapper">
-                <i className="fas fa-heart"></i>
-                {wishlistCount > 0 && (
-                  <Badge bg="danger" className="icon-badge">
-                    {wishlistCount}
-                  </Badge>
-                )}
-              </div>
-            </Nav.Link>
+          <Nav className="align-items-center" role="toolbar" aria-label="User actions">
+            {/* Theme Toggle */}
+            <Button
+              variant="outline-secondary"
+              size="sm"
+              onClick={toggleTheme}
+              className="me-2 theme-toggle-btn"
+              title={`Switch to ${darkMode ? 'light' : 'dark'} mode`}
+              aria-label={`Switch to ${darkMode ? 'light' : 'dark'} mode`}
+              aria-pressed={darkMode}
+            >
+              <i className={`fas ${darkMode ? 'fa-sun' : 'fa-moon'}`} aria-hidden="true"></i>
+            </Button>
 
-            {/* Cart Icon */}
-            <Nav.Link as={Link} to="/cart" className="nav-link icon-link">
-              <div className="icon-wrapper">
-                <i className="fas fa-shopping-cart"></i>
-                {cartCount > 0 && (
-                  <Badge bg="primary" className="icon-badge">
-                    {cartCount}
-                  </Badge>
-                )}
-              </div>
+            {/* Cart */}
+            <Nav.Link 
+              as={Link} 
+              to="/cart" 
+              className="position-relative me-3 cart-link"
+              aria-label={`Shopping cart with ${cartCount} items`}
+              role="button"
+            >
+              <i className="fas fa-shopping-cart" aria-hidden="true"></i>
+              {cartCount > 0 && (
+                <Badge 
+                  bg="danger" 
+                  pill 
+                  className="position-absolute top-0 start-100 translate-middle cart-badge"
+                  aria-label={`${cartCount} items in cart`}
+                >
+                  {cartCount}
+                </Badge>
+              )}
             </Nav.Link>
 
             {/* User Menu */}
             {isAuthenticated ? (
               <NavDropdown 
                 title={
-                  <span className="user-menu-title">
-                    <i className="fas fa-user-circle me-2"></i>
+                  <span>
+                    <i className="fas fa-user-circle me-1" aria-hidden="true"></i>
                     {user?.firstName || 'User'}
                   </span>
                 } 
-                id="user-dropdown"
-                className="user-dropdown"
+                id="user-nav-dropdown"
+                align="end"
+                role="menu"
+                aria-label="User account menu"
               >
-                <NavDropdown.Item as={Link} to="/profile">
-                  <i className="fas fa-user me-2"></i>
-                  My Profile
+                <NavDropdown.Item 
+                  as={Link} 
+                  to="/profile"
+                  role="menuitem"
+                  aria-label="View and edit your profile"
+                >
+                  <i className="fas fa-user me-2" aria-hidden="true"></i>Profile
                 </NavDropdown.Item>
-                <NavDropdown.Item as={Link} to="/orders">
-                  <i className="fas fa-shopping-bag me-2"></i>
-                  My Orders
+                <NavDropdown.Item 
+                  as={Link} 
+                  to="/orders"
+                  role="menuitem"
+                  aria-label="View your order history"
+                >
+                  <i className="fas fa-box me-2" aria-hidden="true"></i>My Orders
                 </NavDropdown.Item>
-                <NavDropdown.Item as={Link} to="/wishlist">
-                  <i className="fas fa-heart me-2"></i>
-                  Wishlist
+                <NavDropdown.Item 
+                  as={Link} 
+                  to="/wishlist"
+                  role="menuitem"
+                  aria-label="View your wishlist"
+                >
+                  <i className="fas fa-heart me-2" aria-hidden="true"></i>Wishlist
                 </NavDropdown.Item>
-                {user?.isAdmin && (
-                  <>
-                    <NavDropdown.Divider />
-                    <NavDropdown.Item as={Link} to="/admin/dashboard">
-                      <i className="fas fa-tachometer-alt me-2"></i>
-                      Admin Dashboard
-                    </NavDropdown.Item>
-                  </>
-                )}
                 <NavDropdown.Divider />
-                <NavDropdown.Item onClick={handleLogout}>
-                  <i className="fas fa-sign-out-alt me-2"></i>
-                  Logout
+                <NavDropdown.Item 
+                  onClick={handleLogout}
+                  role="menuitem"
+                  aria-label="Sign out of your account"
+                >
+                  <i className="fas fa-sign-out-alt me-2" aria-hidden="true"></i>Logout
                 </NavDropdown.Item>
               </NavDropdown>
             ) : (
-              <div className="auth-buttons">
+              <div className="d-flex gap-2">
                 <Button 
                   as={Link} 
                   to="/login" 
                   variant="outline-primary" 
-                  size="sm" 
-                  className="me-2"
+                  size="sm"
+                  aria-label="Sign in to your account"
                 >
-                  <i className="fas fa-sign-in-alt me-1"></i>
                   Login
                 </Button>
                 <Button 
@@ -160,9 +248,9 @@ const CustomNavbar = () => {
                   to="/register" 
                   variant="primary" 
                   size="sm"
+                  aria-label="Create a new account"
                 >
-                  <i className="fas fa-user-plus me-1"></i>
-                  Sign Up
+                  Register
                 </Button>
               </div>
             )}
@@ -173,4 +261,4 @@ const CustomNavbar = () => {
   );
 };
 
-export default CustomNavbar;
+export default Navigation;
